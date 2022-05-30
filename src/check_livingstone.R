@@ -8,6 +8,7 @@ library(rLakeAnalyzer)
 library(lubridate)
 library(pracma)
 library(broom)
+library(ggpmisc)
 
 # Package ID: knb-lter-ntl.29.30 Cataloging System:https://pasta.edirepository.org.
 # Data set title: North Temperate Lakes LTER: Physical Limnology of Primary Study Lakes 1981 - current.
@@ -186,10 +187,11 @@ lines(depths, max(areas) * (1 - depths/max(depths))^q$par, col = 'red')
 
 for (id.year in unique(df$year4)){
   obs <- df %>%
-    dplyr::filter(year4 == id.year)
+    dplyr::filter(year4 == id.year) %>%
+    filter_at(vars(o2), all_vars(!is.na(.)))
 
   dat1 <- matrix(NA, nrow = length(seq(0, 23, 0.5)), ncol = length(unique(obs$sampledate)))
-  ph1 <- matrix(NA, nrow = 3, ncol = length(unique(obs$sampledate)))
+  ph1 <- matrix(NA, nrow = 4, ncol = length(unique(obs$sampledate)))
   for (i in unique(obs$sampledate)){
 
     obs.dt <- obs %>%
@@ -210,18 +212,34 @@ for (id.year in unique(df$year4)){
     ph1[3, match(i, unique(obs$sampledate))] <- center.buoyancy(approx(obs.dt$depth,
                                                                     obs.dt$wtemp,
                                                                     seq(0, 23, 0.5), rule = 2)$y, seq(0, 23, 0.5))
+    ph1[4, match(i, unique(obs$sampledate))] <- meta.depths(approx(obs.dt$depth,
+                                                                       obs.dt$wtemp,
+                                                                       seq(0, 23, 0.5), rule = 2)$y, seq(0, 23, 0.5))[2]
   }
   if(yday(unique(obs$sampledate))[which.max(colSums(dat1))] < 250){
     max.date <- which.max(colSums(dat1))
   } else {
     max.date <- which.max(colSums(dat1[, which(yday(unique(obs$sampledate)) < 250)]))
   }
+  if (colSums(dat1)[max.date+1] < colSums(dat1)[max.date] &&
+      colSums(dat1)[max.date+2] > colSums(dat1)[max.date + 1] ){
+    max.date <- which.max(colSums(dat1))+2
+  }
 
-  therm.dep <- ceiling(mean(ph1[1,], na.rm = T))
+  therm.dep <- ceiling(mean(ph1[4,], na.rm = T))
 
   dat2 <- dat1[which(seq(0, 23, 0.5) == therm.dep) : nrow(dat1), max.date:ncol(dat1)]
   deps <- seq(0,23,0.5)[which(seq(0, 23, 0.5) == therm.dep) : nrow(dat1)]
   times <- yday(unique(obs$sampledate)[max.date:ncol(dat1)])
+
+  jpeg(paste0('../figs/',id.year,'.jpg'))
+  plot(dat1[(which(seq(0, 23, 0.5) == therm.dep) : nrow(dat1))[1],], lty = 1, ylim = c(0, max(na.omit(dat1[1,]))),
+       ylab = 'DO conc [mg/m3]')
+  abline(v = max.date, col = 'red', lty =2, lwd = 3)
+  for (p in (which(seq(0, 23, 0.5) == therm.dep) : nrow(dat1))[2]:max((which(seq(0, 23, 0.5) == therm.dep) : nrow(dat1)))){
+    lines(dat1[p,])
+  }
+  dev.off()
 
   for (j in 1:nrow(dat2)){
 
@@ -259,18 +277,23 @@ for (l in unique(df.livingstone$year)){
   dit.l <- df.livingstone %>%
     dplyr::filter(year == l)
 
+  ggplot(dit.l) +
+    geom_point(aes(alphaz, jz)) +
+    scale_x_continuous(trans='log10') +
+    theme_bw()
+
   sum.mod <- lm(abs(jz) ~ alphaz, data = dit.l)
   p  <-summary(sum.mod)$coefficients[,"Pr(>|t|)"][2]
 
   if (!is.na(p) && p <= 0.05){
     coeff = rbind(coeff, data.frame('year' = l,
-                                    'Jz' = abs(mean(dit.l$jz, na.rm = T)),
+                                    'Jz' = abs(median(dit.l$jz, na.rm = T)),
                                     'Jv' = sum.mod$coefficients[1],
                                     'Ja' = sum.mod$coefficients[2],
                                     'id' = "ME"))
   } else {
     coeff = rbind(coeff, data.frame('year' = l,
-                                    'Jz' = abs(mean(dit.l$jz, na.rm = T)),
+                                    'Jz' = NA,
                                     'Jv' = NA,
                                     'Ja' = NA,
                                     'id' = "ME"))
@@ -278,14 +301,35 @@ for (l in unique(df.livingstone$year)){
 
 }
 
-ggplot(subset(coeff, year != 2007 & year != 2018), aes(year, Jz, col = 'Volume')) +
+my.formula <- y ~ x
+ggplot(df.livingstone, aes(alphaz, abs(jz))) +
+  geom_point() +
+  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x) +
+  stat_poly_eq(formula = my.formula,
+                 aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                 parse = TRUE,size = rel(4.5),
+                 label.y = 0.05,
+                 label.x = 0.1) +
+  facet_wrap(~year,scales = "free") +
+  theme_bw() +
+    # ylab(expression("Diss. oxygen depletion rate [g"*~m^{-3}*","*~d^{-1}))
+  labs(y= expression("Diss. oxygen depletion rate J(z) [g"*~m^{-3}*""*~d^{-1}*"]"),
+         x= expression("\u03b1(z) ["~m^{2}*""*~m^{-3}*"]"))+
+  theme(text = element_text(size=20),
+          legend.position = "none",
+          axis.text.x = element_text(angle=0, hjust=1))
+ggsave('../figs/livingstone_regressions.png', dpi = 300, width = 19,height = 9, units = 'in')
+
+
+ggplot(coeff, aes(year, Jz, col = 'Volume')) +
   geom_line(aes(year, Jv, col = 'Volume')) +
-  geom_line(aes(year, Ja, col = 'Sediment')) +
-  geom_line(aes(year, Jz, col = 'Total Sink')) +
+  geom_line(aes(year, Ja / 10, col = 'Sediment')) +
+  geom_line(aes(year, Jz, col = 'Median Sink')) +
   geom_point(aes(year, Jv, col = 'Volume')) +
-  geom_point(aes(year, Ja, col = 'Sediment')) +
-  geom_point(aes(year, Jz, col = 'Total Sink')) +
+  geom_point(aes(year, Ja / 10, col = 'Sediment')) +
+  geom_point(aes(year, Jz, col = 'Median Sink')) +
   geom_smooth(method = "loess", size = 1.5) +
+  geom_smooth(aes(year, Ja / 10, col = 'Sediment'), method = "loess", size = 1.5) +
   ylab("Oxygen flux in g/m3/d") + xlab('') +
   theme_bw()
 ggsave('../figs/livingstone_fluxes.png', dpi = 300, units = 'in', width = 5, height = 3)
