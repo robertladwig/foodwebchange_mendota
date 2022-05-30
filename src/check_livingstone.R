@@ -147,6 +147,9 @@ coeff = data.frame('year' = NULL,
                    'Jv' = NULL,
                    'Ja' = NULL,
                    'id' = NULL)
+anoxicfactor = data.frame('year' = NULL,
+                          'AF' = NULL,
+                          'id' = NULL)
 
 hypso <- read_csv('../data/LakeEnsemblR_bathymetry_standard.csv')
 H <- hypso$Depth_meter
@@ -246,6 +249,24 @@ for (id.year in unique(df$year4)){
   }
   dev.off()
 
+  areas.af <- approx(depths, areas, seq(0,23,0.5))$y
+  dat.af = matrix(NA, ncol = length(seq(yday(unique(obs$sampledate))[1], max(yday(unique(obs$sampledate))), 1)), nrow = nrow(dat1))
+  for (m in 1:nrow(dat.af)){
+    dat.af[m,] <- interp1(yday(unique(obs$sampledate)),
+                      dat1[m, ],
+                      xi = seq(yday(unique(obs$sampledate))[1], max(yday(unique(obs$sampledate))), 1),
+                      method = 'spline')
+  }
+  dat.af2 <- dat.af[, which(seq(yday(unique(obs$sampledate))[1], max(yday(unique(obs$sampledate))), 1) > 120)]
+  dat.af3 <- ifelse(dat.af2 <= thresh, 1, NA)
+
+  seq.af <- na.contiguous(apply(dat.af3, 2, function(x) which.min(x)[1]))
+  sum(areas.af[seq.af])/max(areas.af)
+
+  anoxicfactor = rbind(anoxicfactor, data.frame('year' = id.year,
+                            'AF' = sum(areas.af[seq.af])/max(areas.af),
+                            'id' = 'ME'))
+
   for (j in 1:nrow(dat2)){
 
     thresh <- 1.5
@@ -327,8 +348,12 @@ ggplot(df.livingstone, aes(alphaz, abs(jz))) +
           axis.text.x = element_text(angle=0, hjust=1))
 ggsave('../figs/livingstone_regressions.png', dpi = 300, width = 22,height = 9, units = 'in')
 
-
-ggplot(coeff, aes(year, Jz, col = 'Volumetric')) +
+g1 <- ggplot(anoxicfactor) +
+  geom_line(aes(year, AF)) +
+  geom_point(aes(year, AF)) +
+  ylab('Anoxic Factor (days per season)') + xlab('') +
+  theme_bw()
+g2 <- ggplot(coeff, aes(year, Jz, col = 'Volumetric')) +
   geom_line(aes(year, Jv, col = 'Volumetric')) +
   # geom_line(aes(year, Jz, col = 'Median Flux')) +
   geom_point(aes(year, Jv, col = 'Volumetric')) +
@@ -339,7 +364,17 @@ ggplot(coeff, aes(year, Jz, col = 'Volumetric')) +
   geom_smooth(aes(year, Ja , col = 'Areal'), method = "loess", size = 1.5) +
   scale_y_continuous(sec.axis = sec_axis(~.*1, name = expression("Areal flux ["*g~m^{-2}*d^{-1}*"]"))) +
   ylab(expression("Volumetric flux ["*g~m^{-3}*d^{-1}*"]")) + xlab('') +
-  theme_bw()
+  theme_bw()+
+  theme(axis.line.y.right = element_line(color = "red"),
+        axis.ticks.y.right = element_line(color = "red"),
+        axis.text.y.right = element_text(color = "red"),
+        axis.title.y.right = element_text(color = "red"),
+        axis.line.y.left = element_line(color = "darkcyan"),
+        axis.ticks.y.left = element_line(color = "darkcyan"),
+        axis.text.y.left = element_text(color = "darkcyan"),
+        axis.title.y.left = element_text(color = "darkcyan"),
+        legend.position = "none"
+  ); g1 / g2
 # ggplot(coeff, aes(year, Ja, col = 'Volume')) +
 #   # geom_line(aes(year, Jv, col = 'Volume')) +
 #   geom_line(aes(year, Ja , col = 'Sediment')) +
@@ -351,4 +386,4 @@ ggplot(coeff, aes(year, Jz, col = 'Volumetric')) +
 #   geom_smooth(aes(year, Ja , col = 'Sediment'), method = "loess", size = 1.5) +
 #   ylab("Oxygen flux in g/m2/d") + xlab('') +
 #   theme_bw()
-ggsave('../figs/livingstone_fluxes.png', dpi = 300, units = 'in', width = 7, height = 5)
+ggsave(plot = g1 / g2, '../figs/livingstone_fluxes.png', dpi = 300, units = 'in', width = 7, height = 7)
