@@ -9,6 +9,7 @@ library(lubridate)
 library(pracma)
 library(broom)
 library(ggpmisc)
+library(patchwork)
 
 # Package ID: knb-lter-ntl.29.30 Cataloging System:https://pasta.edirepository.org.
 # Data set title: North Temperate Lakes LTER: Physical Limnology of Primary Study Lakes 1981 - current.
@@ -216,10 +217,14 @@ for (id.year in unique(df$year4)){
                                                                        obs.dt$wtemp,
                                                                        seq(0, 23, 0.5), rule = 2)$y, seq(0, 23, 0.5))[2]
   }
-  if(yday(unique(obs$sampledate))[which.max(colSums(dat1))] < 250){
+  if(yday(unique(obs$sampledate))[which.max(colSums(dat1))] < 250 &&
+     min(dat1[, which.max(colSums(dat1))]) >= 5){
     max.date <- which.max(colSums(dat1))
   } else {
-    max.date <- which.max(colSums(dat1[, which(yday(unique(obs$sampledate)) < 250)]))
+    ix = which(yday(unique(obs$sampledate)) < 250)
+    iy = which(apply(dat1,2,min) >= 5)
+    # max.date <- which.max(colSums(dat1[, na.omit(match(iy,ix))[1]]))
+    max.date <- na.omit(match(iy,ix))[1]
   }
   if (colSums(dat1)[max.date+1] < colSums(dat1)[max.date] &&
       colSums(dat1)[max.date+2] > colSums(dat1)[max.date + 1] ){
@@ -243,26 +248,28 @@ for (id.year in unique(df$year4)){
 
   for (j in 1:nrow(dat2)){
 
+    thresh <- 1.5
+
     start = dat2[j,1]
-    end = dat2[j, which(dat2[1,] < 1)[1]]
+    end = dat2[j, which(dat2[1,] < thresh)[1]]
 
     start.time = times[1]
-    end.time = times[which(dat2[1,] < 1)[1]]
+    end.time = times[which(dat2[1,] < thresh)[1]]
 
     if (all(dat2[j,] > 1)){
       next
     }
 
-    dat3 <- interp1(times[1:which(dat2[j,] <= 1)[1]],
-                    dat2[j, 1:which(dat2[j,] <= 1)[1]],
-                    xi = seq(times[1], times[which(dat2[j,] <= 1)[1]], 1),
+    dat3 <- interp1(times[1:which(dat2[j,] <= thresh)[1]],
+                    dat2[j, 1:which(dat2[j,] <= thresh)[1]],
+                    xi = seq(times[1], times[which(dat2[j,] <= thresh)[1]], 1),
                     method = 'linear')
 
-    times.in <- seq(times[1], times[which(dat2[j,] <= 1)[1]], 1)
+    times.in <- seq(times[1], times[which(dat2[j,] <= thresh)[1]], 1)
 
     df.livingstone <- rbind(df.livingstone, data.frame('year' = id.year,
                'depth' = deps[j],
-               'jz' = (dat3[1] - dat3[which(dat3 <= 1)[1]]) / (times.in[1] - times.in[which(dat3 <= 1)[1]]),
+               'jz' = (dat3[1] - dat3[which(dat3 <= thresh)[1]]) / (times.in[1] - times.in[which(dat3 <= thresh)[1]]),
                'alphaz' = q$par/(max(deps)+1 - deps[j]),
                'id' = 'ME'))
 
@@ -282,7 +289,7 @@ for (l in unique(df.livingstone$year)){
     scale_x_continuous(trans='log10') +
     theme_bw()
 
-  sum.mod <- lm(abs(jz) ~ alphaz, data = dit.l)
+  sum.mod <- lm(abs(jz) ~ log(alphaz), data = dit.l)
   p  <-summary(sum.mod)$coefficients[,"Pr(>|t|)"][2]
 
   if (!is.na(p) && p <= 0.05){
@@ -301,10 +308,10 @@ for (l in unique(df.livingstone$year)){
 
 }
 
-my.formula <- y ~ x
+my.formula <- y ~ log(x)
 ggplot(df.livingstone, aes(alphaz, abs(jz))) +
   geom_point() +
-  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x) +
+  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ log(x)) +
   stat_poly_eq(formula = my.formula,
                  aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
                  parse = TRUE,size = rel(4.5),
@@ -318,18 +325,30 @@ ggplot(df.livingstone, aes(alphaz, abs(jz))) +
   theme(text = element_text(size=20),
           legend.position = "none",
           axis.text.x = element_text(angle=0, hjust=1))
-ggsave('../figs/livingstone_regressions.png', dpi = 300, width = 19,height = 9, units = 'in')
+ggsave('../figs/livingstone_regressions.png', dpi = 300, width = 22,height = 9, units = 'in')
 
 
-ggplot(coeff, aes(year, Jz, col = 'Volume')) +
-  geom_line(aes(year, Jv, col = 'Volume')) +
-  geom_line(aes(year, Ja / 10, col = 'Sediment')) +
-  geom_line(aes(year, Jz, col = 'Median Sink')) +
-  geom_point(aes(year, Jv, col = 'Volume')) +
-  geom_point(aes(year, Ja / 10, col = 'Sediment')) +
-  geom_point(aes(year, Jz, col = 'Median Sink')) +
+ggplot(coeff, aes(year, Jz, col = 'Volumetric')) +
+  geom_line(aes(year, Jv, col = 'Volumetric')) +
+  # geom_line(aes(year, Jz, col = 'Median Flux')) +
+  geom_point(aes(year, Jv, col = 'Volumetric')) +
+  # geom_point(aes(year, Jz, col = 'Median Flux')) +
   geom_smooth(method = "loess", size = 1.5) +
-  geom_smooth(aes(year, Ja / 10, col = 'Sediment'), method = "loess", size = 1.5) +
-  ylab("Oxygen flux in g/m3/d") + xlab('') +
+  geom_line(aes(year, Ja , col = 'Areal')) +
+  geom_point(aes(year, Ja , col = 'Areal')) +
+  geom_smooth(aes(year, Ja , col = 'Areal'), method = "loess", size = 1.5) +
+  scale_y_continuous(sec.axis = sec_axis(~.*1, name = expression("Areal flux ["*g~m^{-2}*d^{-1}*"]"))) +
+  ylab(expression("Volumetric flux ["*g~m^{-3}*d^{-1}*"]")) + xlab('') +
   theme_bw()
-ggsave('../figs/livingstone_fluxes.png', dpi = 300, units = 'in', width = 5, height = 3)
+# ggplot(coeff, aes(year, Ja, col = 'Volume')) +
+#   # geom_line(aes(year, Jv, col = 'Volume')) +
+#   geom_line(aes(year, Ja , col = 'Sediment')) +
+#   # geom_line(aes(year, Jz, col = 'Median Sink')) +
+#   # geom_point(aes(year, Jv, col = 'Volume')) +
+#   geom_point(aes(year, Ja , col = 'Sediment')) +
+#   # geom_point(aes(year, Jz, col = 'Median Sink')) +
+#   # geom_smooth(method = "loess", size = 1.5) +
+#   geom_smooth(aes(year, Ja , col = 'Sediment'), method = "loess", size = 1.5) +
+#   ylab("Oxygen flux in g/m2/d") + xlab('') +
+#   theme_bw()
+ggsave('../figs/livingstone_fluxes.png', dpi = 300, units = 'in', width = 7, height = 5)
