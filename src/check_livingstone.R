@@ -264,7 +264,8 @@ for (id.year in unique(df$year4)){
   sum(areas.af[seq.af])/max(areas.af)
 
   anoxicfactor = rbind(anoxicfactor, data.frame('year' = id.year,
-                            'AF' = sum(areas.af[seq.af])/max(areas.af),
+                            # 'AF' = sum(areas.af[seq.af])/max(areas.af),
+                            'AF' = sum(areas.af[apply(dat.af3, 2, function(x) which.min(x)[1])], na.rm = T)/max(areas.af),
                             'id' = 'ME'))
 
   for (j in 1:nrow(dat2)){
