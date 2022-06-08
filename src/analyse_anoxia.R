@@ -20,7 +20,7 @@ fluxes <- read_csv('../output/dosinks.csv')
 df.strat <- strat %>%
   group_by(year) %>%
   mutate(med = mean(linear, constant.low, constant.high, spline)) %>%
-  select(year, med)
+  select(year, med, linear, constant.low, constant.high, spline)
 
 df.anoxic <- anoxic %>%
   dplyr::filter(year != 1995) %>%
@@ -83,3 +83,52 @@ g4 <- ggplot(df,aes(Jz, AF)) +
 
 g <- (g1 + g2) / (g3 + g4); g
 ggsave(plot = g, '../figs/comparison.png', dpi = 300, units = 'in', width = 7, height = 7)
+
+
+
+g5 <- ggplot(df.anoxic) +
+  geom_line(aes(year, AF)) +
+  geom_point(aes(year, AF)) +
+  ylab('Anoxic Factor (days per season)') + xlab('') +
+  theme_bw()
+g6 <- ggplot(df.strat) +
+  geom_ribbon(aes(x = year, ymin = constant.low, ymax = constant.high), fill = 'grey80') +
+  geom_line(aes(x = year, y = linear)) +
+  geom_point(aes(x = year, y = linear)) +
+  geom_line(aes(x = year, y = spline), linetype = 2, color = 'red3') +
+  ylab('Stratification Duration (days)') + xlab('') +
+  theme_bw()
+g7 <- ggplot(df.flux, aes(year, Jz, col = 'Volumetric')) +
+  geom_line(aes(year, Jv, col = 'Volumetric')) +
+  # geom_line(aes(year, Jz, col = 'Median Flux')) +
+  geom_point(aes(year, Jv, col = 'Volumetric')) +
+  # geom_point(aes(year, Jz, col = 'Median Flux')) +
+  geom_smooth(method = "loess", size = 1.5) +
+  geom_line(aes(year, Ja , col = 'Areal')) +
+  geom_point(aes(year, Ja , col = 'Areal')) +
+  geom_smooth(aes(year, Ja , col = 'Areal'), method = "loess", size = 1.5) +
+  scale_y_continuous(sec.axis = sec_axis(~.*1, name = expression("Areal flux ["*g~m^{-2}*d^{-1}*"]"))) +
+  ylab(expression("Volumetric flux ["*g~m^{-3}*d^{-1}*"]")) + xlab('') +
+  theme_bw()+
+  theme(axis.line.y.right = element_line(color = "red"),
+        axis.ticks.y.right = element_line(color = "red"),
+        axis.text.y.right = element_text(color = "red"),
+        axis.title.y.right = element_text(color = "red"),
+        axis.line.y.left = element_line(color = "darkcyan"),
+        axis.ticks.y.left = element_line(color = "darkcyan"),
+        axis.text.y.left = element_text(color = "darkcyan"),
+        axis.title.y.left = element_text(color = "darkcyan"),
+        legend.position = "none"
+  ); g5 / g6 / g7
+# ggplot(coeff, aes(year, Ja, col = 'Volume')) +
+#   # geom_line(aes(year, Jv, col = 'Volume')) +
+#   geom_line(aes(year, Ja , col = 'Sediment')) +
+#   # geom_line(aes(year, Jz, col = 'Median Sink')) +
+#   # geom_point(aes(year, Jv, col = 'Volume')) +
+#   geom_point(aes(year, Ja , col = 'Sediment')) +
+#   # geom_point(aes(year, Jz, col = 'Median Sink')) +
+#   # geom_smooth(method = "loess", size = 1.5) +
+#   geom_smooth(aes(year, Ja , col = 'Sediment'), method = "loess", size = 1.5) +
+#   ylab("Oxygen flux in g/m2/d") + xlab('') +
+#   theme_bw()
+ggsave(plot = g5 / g6 / g7, '../figs/timeseries_comparison.png', dpi = 300, units = 'in', width = 7, height = 9)
