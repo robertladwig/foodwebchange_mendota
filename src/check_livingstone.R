@@ -248,7 +248,9 @@ for (id.year in unique(df$year4)){
     lines(dat1[p,])
   }
   dev.off()
-
+  
+  thresh <- 1.5
+  
   areas.af <- approx(depths, areas, seq(0,23,0.5))$y
   dat.af = matrix(NA, ncol = length(seq(yday(unique(obs$sampledate))[1], max(yday(unique(obs$sampledate))), 1)), nrow = nrow(dat1))
   for (m in 1:nrow(dat.af)){
@@ -270,7 +272,6 @@ for (id.year in unique(df$year4)){
 
   for (j in 1:nrow(dat2)){
 
-    thresh <- 1.5
 
     start = dat2[j,1]
     end = dat2[j, which(dat2[1,] < thresh)[1]]
@@ -388,3 +389,7 @@ g2 <- ggplot(coeff, aes(year, Jz, col = 'Volumetric')) +
 #   ylab("Oxygen flux in g/m2/d") + xlab('') +
 #   theme_bw()
 ggsave(plot = g1 / g2, '../figs/livingstone_fluxes.png', dpi = 300, units = 'in', width = 7, height = 7)
+
+
+write_csv(anoxicfactor, '../output/anoxicfactor.csv')
+write_csv(coeff, '../output/dosinks.csv')
