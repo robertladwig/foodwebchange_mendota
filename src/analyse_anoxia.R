@@ -43,7 +43,7 @@ my.formula <- y ~ (x)
 g1 <- ggplot(df,aes(med, AF)) + 
   geom_point() +
   xlab('Mean stratification duration (d)') + ylab('Anoxic factor (d)') +
-  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ log(x)) +
+  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
@@ -53,7 +53,7 @@ g1 <- ggplot(df,aes(med, AF)) +
 g2 <- ggplot(df,aes(Jv, AF)) + 
   geom_point() +
   xlab('Volumetric sink (g/m3/d))') + ylab('Anoxic factor (d)') +
-  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ log(x)) +
+  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
@@ -63,7 +63,7 @@ g2 <- ggplot(df,aes(Jv, AF)) +
 g3 <- ggplot(df,aes(Ja, AF)) + 
   geom_point() +
   xlab('Areal sink (g/m2/d)') + ylab('Anoxic factor (d)') +
-  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ log(x)) +
+  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
@@ -73,7 +73,7 @@ g3 <- ggplot(df,aes(Ja, AF)) +
 g4 <- ggplot(df,aes(Jz, AF)) + 
   geom_point() +
   xlab('Total sink (g/m3/d)') + ylab('Anoxic factor (d)') +
-  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ log(x)) +
+  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
