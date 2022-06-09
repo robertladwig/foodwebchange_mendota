@@ -1,3 +1,5 @@
 # foodwebchange_mendota
 
-![](figs/livingstone_fluxes.png)<!-- -->
+![](figs/timeseries_comparison.png)<!-- -->
+
+![](figs/comparison.png)<!-- -->
