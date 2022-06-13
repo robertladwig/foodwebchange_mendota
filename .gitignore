@@ -1,6 +1,8 @@
 .DS_Store
 .Rproj.user
 foodwebchange_mendota.Rproj
+.RData
+.Rhistory
 
 # make soft link to plots folder in dropbox:
 # ln -s /Users/rohwer/Dropbox/Research/data-pointed-to-by-git-repos/foodwebchange_mendota/plots plots
