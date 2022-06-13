@@ -113,6 +113,8 @@ phyt.tab.pre <- get.aligned.tables(x.min = min(phyt$yday), x.max = max(phyt$yday
                                    year.range = 1995:2009, my.interp = phyt.interp)
 phyt.tab.post <- get.aligned.tables(x.min = min(phyt$yday), x.max = max(phyt$yday), 
                                     year.range = 2010:2020, my.interp = phyt.interp)
+phyt.tab.all <- get.aligned.tables(x.min = min(phyt$yday), x.max = max(phyt$yday),
+                                   year.range = unique(phyt$year), my.interp = phyt.interp)
 
 phyt.ave.pre <- get.group.aves.etc(my.tab = phyt.tab.pre)
 phyt.ave.post <- get.group.aves.etc(my.tab = phyt.tab.post)
@@ -127,6 +129,8 @@ saveRDS(object = phyt.split, file = "robin-data/2022-06-09_annual_patterns/phyto
 saveRDS(object = phyt.interp, file = "robin-data/2022-06-09_annual_patterns/phyto-interp_split_by_year.rds")
 
 saveRDS(object = list("pre" = phyt.ave.pre, "post" = phyt.ave.post, "pval" = phyt.pval), file = "robin-data/2022-06-09_annual_patterns/phyto_stats.rds")
+
+saveRDS(object = phyt.tab.all, file = "robin-data/2022-06-09_annual_patterns/interp_table.rds")
 
 # ---- plot data quickly ----
 
