@@ -15,6 +15,32 @@ boxplot(mean.biomass)
 boxplot(phyto)
 boxplot(as.vector(phyto))
 
-high.biomass <- 5
+high.biomass <- 1
+
+phyto.high <- phyto > high.biomass
+total.high.days <- colSums(phyto.high, na.rm = T)
+
+par(mar = c(4,4,1,.5))
+barplot(total.high.days, names.arg = sub(pattern = "\\.bio",replacement = "",x = names(total.high.days)), las = 2, ylab = "Total Days with Biomass > 1 mg/L")
+
+boxplot(list("Before\n(1995-2009)" = total.high.days[1:15], "After\n(2010-2020)" = total.high.days[16:26]), ylab = "Total Days with Biomass > 1 mg/L")
+
+boxplot(list("1995-2001" = total.high.days[1:7],"2002-2009" = total.high.days[8:15], "2010-2020" = total.high.days[16:26]), ylab = "Total Days with Biomass > 1 mg/L")
+# DO we know why Mendota was clearer for 2002-2009?
 
 
+# ----
+pdf(file = "plots/2022-06-13_biomass_duration_boxplot.pdf", width = 3, height = 3)
+par(mar = c(3,3.5,1,.5))
+boxes <- list("Before\n(1995-2009)" = total.high.days[1:15], "After\n(2010-2020)" = total.high.days[16:26])
+x.locs <- boxplot(x = boxes, axes = F, col = c("steelblue","orange2"))
+# points(x = jitter(x = rep(1,length(boxes[[1]])), factor = 4), y = boxes[[1]])
+# points(x = jitter(x = rep(2,length(boxes[[2]])), factor = 4), y = boxes[[2]])
+box()
+mtext(text = names(boxes), side = 1, line = 1.75, at = c(1,2))
+mtext(text = "Total Days with Biomass > 1 mg/L", side = 2, line = 2.25)
+axis(side = 2, las = 2, labels = F, lwd = 0, lwd.ticks = 1, tck = -.025)
+axis(side = 2, las = 2, labels = T, line = -.5, lwd = 0)
+axis(side = 1, lwd = 0, lwd.ticks = 1, labels = F, at = c(1,2))
+dev.off()
+# ----        
