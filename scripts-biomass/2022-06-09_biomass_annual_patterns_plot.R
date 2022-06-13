@@ -122,7 +122,11 @@ head(phyt.pval)
 
 # ---- save data ----
 
+saveRDS(object = phyt.split, file = "robin-data/2022-06-09_annual_patterns/phyto_split_by_year.rds")
 
+saveRDS(object = phyt.interp, file = "robin-data/2022-06-09_annual_patterns/phyto-interp_split_by_year.rds")
+
+saveRDS(object = list("pre" = phyt.ave.pre, "post" = phyt.ave.post, "pval" = phyt.pval), file = "robin-data/2022-06-09_annual_patterns/phyto_stats.rds")
 
 # ---- plot data quickly ----
 
@@ -161,9 +165,14 @@ fill.btwn.lines(X = phyt.pval$day[-index], Y1 = rep(0,length(phyt.pval$day[-inde
                 Y2 = phyt.pval$is.less.05[-index] * 7.5, Color = adjustcolor("grey",.5), xpd = F)
 lines(x = phyt.ave.pre$day, y = phyt.ave.pre$ave, col = "steelblue", lwd = 4)
 lines(x = phyt.ave.post$day, y = phyt.ave.post$ave, col = "orange2", lwd = 4)
+mtext(text = "Total Biomass (mg/L)", side = 2, line = 2, outer = F)
+mtext(text = "Day of year", side = 1, line = 2, outer = F)
 
 days.na <- unique(c(phyt.ave.pre$day[is.na(phyt.ave.pre$ave)], phyt.ave.post$day[is.na(phyt.ave.post$ave)]))
 day.start <- max(days.na[days.na < 200])
 day.end <- min(days.na[days.na > 200])
 abline(v = day.start, lty = 2)
 abline(v = day.end, lty = 2)
+
+
+
