@@ -163,15 +163,30 @@ fill.btwn.lines(X = phyt.ave.post$day,
                 Y2 = phyt.ave.post$ave + phyt.ave.post$sd,
                 Y1 = phyt.ave.post$ave - phyt.ave.post$sd, Color = adjustcolor("orange2",.4))
 
-plot(x = c(min(phyt$yday), max(phyt$yday)), y = c(0, max(phyt.ave.post$ave, na.rm = T)), type = "n", ann = F)
+# ----
+pdf(file = "plots/2022-06-09_mean_biomass_before_and_after.pdf", width = 6.5, height = 3)
+# pdf(file = "figs/biomass_increase_at_edges.pdf", width = 6.5, height = 3)
+par(mar = c(3,2.8,1,.5), yaxs = "i", xaxs = "i")
+plot(x = c(min(phyt$yday), max(phyt$yday)), y = c(0, max(phyt.ave.post$ave, na.rm = T) + max(phyt.ave.post$ave, na.rm = T)/20), type = "n", ann = F, axes = F)
 index <- is.na(phyt.pval$is.less.05)
 fill.btwn.lines(X = phyt.pval$day[-index], Y1 = rep(0,length(phyt.pval$day[-index])), 
                 Y2 = phyt.pval$is.less.05[-index] * 7.5, Color = adjustcolor("grey",.5), xpd = F)
 lines(x = phyt.ave.pre$day, y = phyt.ave.pre$ave, col = "steelblue", lwd = 4)
 lines(x = phyt.ave.post$day, y = phyt.ave.post$ave, col = "orange2", lwd = 4)
-mtext(text = "Total Biomass (mg/L)", side = 2, line = 2, outer = F)
-mtext(text = "Day of year", side = 1, line = 2, outer = F)
+box()
+axis(side = 1, labels = F, lwd = 0, lwd.ticks = 1)
+axis(side = 1, labels = T, lwd = 0, line = -.4)
+axis(side = 2, labels = F, lwd = 0, lwd.ticks = 1)
+axis(side = 2, labels = T, lwd = 0, line = -.2, las = 2)
+mtext(text = "Mean Biomass (mg/L)", side = 2, line = 1.75, outer = F)
+mtext(text = "Day of year", side = 1, line = 1.75, outer = F)
+mtext(text = "1995 - 2009", side = 3, at = 100, line = -2, col = "steelblue")
+mtext(text = "2010 - 2020", side = 3, at = 100, line = -3.5, col = "orange2")
+mtext(text = c("*","*"), side = 3, line = -1, at = c(51, 293))
 
+dev.off()
+
+# ----
 days.na <- unique(c(phyt.ave.pre$day[is.na(phyt.ave.pre$ave)], phyt.ave.post$day[is.na(phyt.ave.post$ave)]))
 day.start <- max(days.na[days.na < 200])
 day.end <- min(days.na[days.na > 200])
