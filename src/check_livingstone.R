@@ -221,19 +221,25 @@ for (id.year in unique(df$year4)){
                                                                        seq(0, 23, 0.5), rule = 2)$y, seq(0, 23, 0.5))[2]
   }
   if(yday(unique(obs$sampledate))[which.max(colSums(dat1))] < 250 &&
-     min(dat1[, which.max(colSums(dat1))]) >= 5){
+     min(dat1[, which.max(colSums(dat1))]) >= 5 &&
+     yday(unique(obs$sampledate))[which.max(colSums(dat1))] > 60){
     max.date <- which.max(colSums(dat1))
   } else {
-    ix = which(yday(unique(obs$sampledate)) < 250)
+    ix = which(yday(unique(obs$sampledate)) < 250 &
+                 yday(unique(obs$sampledate)) > 60)
     iy = which(apply(dat1,2,min) >= 5)
     # max.date <- which.max(colSums(dat1[, na.omit(match(iy,ix))[1]]))
-    max.date <- na.omit(match(iy,ix))[1]
+    max.date <- ix[ na.omit(match(iy,ix))][1]
   }
   if (colSums(dat1)[max.date+1] < colSums(dat1)[max.date] &&
       colSums(dat1)[max.date+2] > colSums(dat1)[max.date + 1] ){
     max.date <- which.max(colSums(dat1))+2
   }
-
+  
+  # absdiff <- (abs(yday(unique(obs$sampledate)) - yday('1989-04-15')))
+  # max.date <- which.min(absdiff)
+  # 
+  
   therm.dep <- ceiling(mean(ph1[4,], na.rm = T))
 
   dat2 <- dat1[which(seq(0, 23, 0.5) == therm.dep) : nrow(dat1), max.date:ncol(dat1)]
@@ -241,11 +247,11 @@ for (id.year in unique(df$year4)){
   times <- yday(unique(obs$sampledate)[max.date:ncol(dat1)])
 
   jpeg(paste0('../figs/',id.year,'.jpg'))
-  plot(dat1[(which(seq(0, 23, 0.5) == therm.dep) : nrow(dat1))[1],], lty = 1, ylim = c(0, max(na.omit(dat1[1,]))),
+  plot( yday(unique(obs$sampledate)),dat1[(which(seq(0, 23, 0.5) == therm.dep) : nrow(dat1))[1],], lty = 1, ylim = c(0, max(na.omit(dat1[1,]))),
        ylab = 'DO conc [mg/m3]')
-  abline(v = max.date, col = 'red', lty =2, lwd = 3)
+  abline(v = yday(unique(obs$sampledate))[max.date], col = 'red', lty =2, lwd = 3)
   for (p in (which(seq(0, 23, 0.5) == therm.dep) : nrow(dat1))[2]:max((which(seq(0, 23, 0.5) == therm.dep) : nrow(dat1)))){
-    lines(dat1[p,])
+    lines(yday(unique(obs$sampledate)),dat1[p,])
   }
   dev.off()
   
