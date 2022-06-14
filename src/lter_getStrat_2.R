@@ -112,12 +112,12 @@ for (ll in 1:length(lakes)) {
 lake = lakes[ll]
   
 # observed DO data from LTER
-lter.df = dt1 %>% filter(lakeid == lake) %>% 
+lter.df = dt1 %>% dplyr::filter(lakeid == lake) %>% 
   select(sampledate,depth,wtemp,o2) %>% 
-  filter(!is.na(wtemp))
+  dplyr::filter(!is.na(wtemp))
 # only keep depths with  more than 100 sampling points for robust interpolation 
-keep.depths = data.frame(depths = table(lter.df$depth)) %>% filter(depths.Freq > 100)
-lter.df = lter.df %>% filter(depth %in% keep.depths$depths.Var1)
+keep.depths = data.frame(depths = table(lter.df$depth)) %>% dplyr::filter(depths.Freq > 100)
+lter.df = lter.df %>% dplyr::filter(depth %in% keep.depths$depths.Var1)
 table(lter.df$depth) # check on depths 
 
 times_obs <- unique(lter.df$sampledate)
@@ -279,6 +279,8 @@ p.duration.ribbon[[ll]] = ggplot(strat.duration) +
 
 
 write_csv(strat.duration,'../output/stratification.csv')
+write_csv(strat.start,'../output/stratification_start.csv')
+write_csv(strat.end,'../output/stratification_end.csv')
 
 
 # Ribbon plots 
