@@ -17,24 +17,31 @@ anoxic <- read_csv("../output/anoxicfactor.csv")
 
 fluxes <- read_csv('../output/dosinks.csv')
 
+biomass <- read_csv('../output/biomass_duration.csv')
+
 df.strat <- strat %>%
   group_by(year) %>%
   mutate(med = mean(linear, constant.low, constant.high, spline)) %>%
   select(year, med, linear, constant.low, constant.high, spline)
 
 df.anoxic <- anoxic %>%
-  dplyr::filter(year != 1995) %>%
+  dplyr::filter(year != 1995 & year != 2021) %>%
   select(year, AF)
 
 df.flux <- fluxes %>%
-  dplyr::filter(year != 1995) %>%
+  dplyr::filter(year != 1995 & year != 2021) %>%
   select(year, Jz, Jv, Ja)
+
+df.biomass <- biomass %>%
+  dplyr::filter(Year != 1995 & Year != 2021) %>%
+  rename(year = Year)
 
 df <- merge(df.strat, df.anoxic, by = 'year')
 df <- merge(df, df.flux, by = 'year')
+df <- merge(df, df.biomass, by = 'year')
                 
 
-mod <- lm(AF ~ med + Jv , data = df)
+mod <- lm(AF ~ med + Days.0.5.mg.L, data = df)
 summary(mod)
 
 my.formula <- y ~ (x)
@@ -80,8 +87,28 @@ g4 <- ggplot(df,aes(Jz, AF)) +
                label.y = 0.05,
                label.x = 0.1) +
   theme_minimal()
+g5 <- ggplot(df,aes(Days.0.5.mg.L, AF)) + 
+  geom_point() +
+  xlab('Biomass over 0.5 mg/L (d)') + ylab('Anoxic factor (d)') +
+  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
+  stat_poly_eq(formula = my.formula,
+               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               parse = TRUE,size = rel(4.5),
+               label.y = 0.05,
+               label.x = 0.1) +
+  theme_minimal()
+g6 <- ggplot(df,aes(Days.1.5.mg.L, AF)) + 
+  geom_point() +
+  xlab('Biomass over 1 mg/L (d)') + ylab('Anoxic factor (d)') +
+  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
+  stat_poly_eq(formula = my.formula,
+               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               parse = TRUE,size = rel(4.5),
+               label.y = 0.05,
+               label.x = 0.1) +
+  theme_minimal()
 
-g <- (g1 + g2) / (g3 + g4); g
+g <- (g1 + g2) / (g3 + g4)  / (g5 + g6); g
 ggsave(plot = g, '../figs/comparison.png', dpi = 300, units = 'in', width = 7, height = 7)
 
 
@@ -119,7 +146,22 @@ g7 <- ggplot(df.flux, aes(year, Jz, col = 'Volumetric')) +
         axis.text.y.left = element_text(color = "darkcyan"),
         axis.title.y.left = element_text(color = "darkcyan"),
         legend.position = "none"
-  ); g5 / g6 / g7
+  )
+g8 <- ggplot(df.biomass) +
+  geom_line(aes(year, Days.0.5.mg.L, col = '0.5 mg/L')) +
+  geom_point(aes(year, Days.0.5.mg.L, col = '0.5 mg/L')) +
+  geom_line(aes(year, Days.1.mg.L, col = '1 mg/L')) +
+  geom_point(aes(year, Days.1.mg.L, col = '1 mg/L')) +
+  geom_line(aes(year, Days.1.5.mg.L, col = '1.5 mg/L')) +
+  geom_point(aes(year, Days.1.5.mg.L, col = '1.5 mg/L')) +
+  geom_line(aes(year, Days.2.mg.L, col = '2 mg/L')) +
+  geom_point(aes(year, Days.2.mg.L, col = '2 mg/L')) +
+  geom_line(aes(year, Days.3.mg.L, col = '3 mg/L')) +
+  geom_point(aes(year, Days.3.mg.L, col = '3 mg/L')) +
+  ylab('Biomass over threshold (days per year)') + xlab('') +
+  theme_bw()+
+  theme(legend.position="bottom") +
+  theme(legend.title=element_blank()); g5 / g6 / g7 / g8
 # ggplot(coeff, aes(year, Ja, col = 'Volume')) +
 #   # geom_line(aes(year, Jv, col = 'Volume')) +
 #   geom_line(aes(year, Ja , col = 'Sediment')) +
@@ -131,4 +173,4 @@ g7 <- ggplot(df.flux, aes(year, Jz, col = 'Volumetric')) +
 #   geom_smooth(aes(year, Ja , col = 'Sediment'), method = "loess", size = 1.5) +
 #   ylab("Oxygen flux in g/m2/d") + xlab('') +
 #   theme_bw()
-ggsave(plot = g5 / g6 / g7, '../figs/timeseries_comparison.png', dpi = 300, units = 'in', width = 7, height = 9)
+ggsave(plot = g5 / g6 / g7 / g8, '../figs/timeseries_comparison.png', dpi = 300, units = 'in', width = 7, height = 12)
