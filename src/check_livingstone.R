@@ -137,6 +137,8 @@ summary(as.factor(dt1$flaglight))
 summary(as.factor(dt1$flagfrlight))
 detach(dt1)
 
+full.do <- readRDS('../data/8_Combined_LTER_DO_data_with_full_profiles.rds')
+
 df.livingstone = data.frame('year' = NULL,
                             'depth' = NULL,
                             'jz' = NULL,
@@ -189,7 +191,13 @@ q <- optim(par = 0.1, fn = fit_q, areas = areas, depths = depths, method = 'Bren
 plot(depths, areas)
 lines(depths, max(areas) * (1 - depths/max(depths))^q$par, col = 'red')
 
-for (id.year in unique(df$year4)){
+strat.onset <- read_csv('../output/stratification_start.csv')
+strat.onset = strat.onset %>%
+  group_by(year) %>%
+  mutate(mean = mean(yday(linear), yday(constant.high), yday(constant.low), yday(spline)))
+
+
+for (id.year in unique(df$year4)[-1]){
   obs <- df %>%
     dplyr::filter(year4 == id.year) %>%
     filter_at(vars(o2), all_vars(!is.na(.)))
@@ -236,9 +244,10 @@ for (id.year in unique(df$year4)){
     max.date <- which.max(colSums(dat1))+2
   }
   
-  # absdiff <- (abs(yday(unique(obs$sampledate)) - yday('1989-04-15')))
-  # max.date <- which.min(absdiff)
-  # 
+  strat.onset.date <- strat.onset$mean[match(id.year, strat.onset$year)]
+  absdiff <- (abs(yday(unique(obs$sampledate)) - strat.onset.date)) #yday('1989-04-15')
+  max.date <- which.min(absdiff)
+
   
   therm.dep <- ceiling(mean(ph1[4,], na.rm = T))
 
