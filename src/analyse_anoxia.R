@@ -34,6 +34,8 @@ biomass <- read_csv('../output/biomass_duration.csv')
 
 discharge <- read_csv('../output/discharge.csv')
 
+cw <- readRDS('../data/yearly_clearwater_stats.rds')
+
 df.strat <- strat %>%
   group_by(year) %>%
   mutate(med = mean(linear, constant.low, constant.high, spline)) %>%
@@ -54,11 +56,16 @@ df.biomass <- biomass %>%
 df.discharge <- discharge %>%
   dplyr::filter(year != 1995 & year != 2021) 
 
+df.cw <- cw %>%
+  dplyr::filter(Year > 1995) %>%
+  rename(year = Year)
+
 df <- merge(df.strat, df.anoxic, by = 'year')
 df <- merge(df, df.flux, by = 'year')
 df <- merge(df, df.biomass, by = 'year')
 df <- merge(df, df.discharge, by = 'year')
-                
+df <- merge(df, df.cw, by = 'year')
+
 
 mod <- lm(AF ~ med + Days.0.5.mg.L + Jz, data = df)
 summary(mod)
@@ -66,7 +73,9 @@ summary(mod)
 boruta_output <- Boruta(AF ~ med + Jz + Jv + Ja + 
                           Days.0.5.mg.L + Days.1.mg.L + Days.1.5.mg.L +
                           Days.2.mg.L + Days.3.mg.L +
-                          discharge + max.discharge + min.discharge, data = df, doTrace=2,
+                          discharge + max.discharge + min.discharge +
+                          Clearwater.Duration + Prev.Winter.Duration + Max.Clearwater.Depth.m, 
+                        data = df, doTrace=2,
                         maxRuns = 1e4)  # perform Boruta search
 boruta_signif <- names(boruta_output$finalDecision[boruta_output$finalDecision %in% c("Confirmed", "Tentative")])  # collect Confirmed and Tentative variables
 print(boruta_signif)  # significant variables
@@ -92,7 +101,7 @@ summary(hypo1)
 sum.hypo1 <-summary(hypo1)
 step(hypo1)
 
-hypo1 <- lm(AF ~ med + Days.0.5.mg.L + Jz, data = hyp.data)
+hypo1 <- lm(AF ~ med + Days.0.5.mg.L + Jz + Clearwater.Duration, data = hyp.data)
 
 AIC(hypo1)
 BIC(hypo1)
@@ -108,7 +117,7 @@ booteval.relimp(boot, lev =0.9, nodiff=TRUE) # print result
 
 varImp(hypo1, scale = TRUE)
 
-hyp.data2 <- hyp.data[, c(1,2,3,6)]
+hyp.data2 <- hyp.data[, c(1,2,3,6,7)]
 
 res=cor(hyp.data2, method = c("pearson"))
 
@@ -193,8 +202,18 @@ g7 <- ggplot(df,aes(discharge, AF)) +
                label.y = 0.05,
                label.x = 0.1) +
   theme_minimal()
+g8 <- ggplot(df,aes(Clearwater.Duration, AF)) + 
+  geom_point() +
+  xlab('Yahara Q (cfs)') + ylab('Anoxic factor (d)') +
+  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
+  stat_poly_eq(formula = my.formula,
+               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               parse = TRUE,size = rel(4.5),
+               label.y = 0.05,
+               label.x = 0.1) +
+  theme_minimal()
 
-g <- (g1 + g2) / (g3 + g4)  / (g5 + g6) / (g7); g
+g <- (g1 + g2) / (g3 + g4)  / (g5 + g6) / (g7 + g8); g
 ggsave(plot = g, '../figs/comparison.png', dpi = 300, units = 'in', width = 7, height = 7)
 
 
@@ -264,5 +283,10 @@ g9 <- ggplot(df) +
   geom_line(aes(year, discharge)) +
   geom_point(aes(year, discharge)) +
   ylab('Yahara Q (cfs)') + xlab('') +
-  theme_bw(); g5 / g6 / g7 / g9 /g8
-ggsave(plot = g5 / g6 / g7 / g9 / g8, '../figs/timeseries_comparison.png', dpi = 300, units = 'in', width = 7, height = 12)
+  theme_bw(); 
+g10 <- ggplot(df) +
+  geom_line(aes(year, Clearwater.Duration)) +
+  geom_point(aes(year, Clearwater.Duration)) +
+  ylab('Clearwater dur. (days)') + xlab('') +
+  theme_bw(); g5 / g6 / g7 / g9 /g10 /g8
+ggsave(plot = g5 / g6 / g7 / g9 / g10 /g8, '../figs/timeseries_comparison.png', dpi = 300, units = 'in', width = 7, height = 17)
