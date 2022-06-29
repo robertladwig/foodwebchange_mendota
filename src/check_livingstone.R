@@ -246,7 +246,13 @@ for (id.year in unique(df$year4)[-1]){
   
   strat.onset.date <- strat.onset$mean[match(id.year, strat.onset$year)]
   absdiff <- (abs(yday(unique(obs$sampledate)) - strat.onset.date)) #yday('1989-04-15')
-  max.date <- which.min(absdiff)
+  max.date2 <- which.min(absdiff)
+  
+  if (max.date > max.date2){
+    max.date <- max.date
+  } else {
+    max.date <- max.date2
+  }
 
   
   therm.dep <- ceiling(mean(ph1[4,], na.rm = T))
@@ -343,6 +349,12 @@ for (l in unique(df.livingstone$year)){
                                     'Ja' = NA,
                                     'id' = "ME"))
   }
+  
+  # coeff = rbind(coeff, data.frame('year' = l,
+  #                                 'Jz' = abs(median(dit.l$jz, na.rm = T)),
+  #                                 'Jv' = sum.mod$coefficients[1],
+  #                                 'Ja' = sum.mod$coefficients[2],
+  #                                 'id' = "ME"))
 
 }
 
