@@ -39,15 +39,15 @@ cw <- readRDS('../data/yearly_clearwater_stats.rds')
 df.strat <- strat %>%
   group_by(year) %>%
   mutate(med = mean(linear, constant.low, constant.high, spline)) %>%
-  select(year, med, linear, constant.low, constant.high, spline)
+  dplyr::select(year, med, linear, constant.low, constant.high, spline)
 
 df.anoxic <- anoxic %>%
   dplyr::filter(year != 1995 & year != 2021) %>%
-  select(year, AF)
+  dplyr::select(year, AF)
 
 df.flux <- fluxes %>%
   dplyr::filter(year != 1995 & year != 2021) %>%
-  select(year, Jz, Jv, Ja)
+  dplyr::select(year, Jz, Jv, Ja)
 
 df.biomass <- biomass %>%
   dplyr::filter(Year != 1995 & Year != 2021) %>%
@@ -103,6 +103,8 @@ step(hypo1)
 
 hypo1 <- lm(AF ~ med + Days.0.5.mg.L + Jz + Clearwater.Duration, data = hyp.data)
 
+sum.hypo1 <-summary(hypo1)
+
 AIC(hypo1)
 BIC(hypo1)
 
@@ -116,6 +118,39 @@ boot <- boot.relimp(hypo1, b = 1000, type = c("lmg",
 booteval.relimp(boot, lev =0.9, nodiff=TRUE) # print result
 
 varImp(hypo1, scale = TRUE)
+
+
+# 2. Regression line + confidence intervals
+modeleq <- paste0('y = ', round(sum.hypo1$coefficients[1,1],2),
+                  ' + ',round(sum.hypo1$coefficients[2,1],2),' Strat.Dur',
+                  ' + ',round(sum.hypo1$coefficients[3,1],2),' Days>0.5',
+                  ' + ',round(sum.hypo1$coefficients[4,1],2),' DO.Depl',
+                  ' + ',round(sum.hypo1$coefficients[5,1],2),' Clear.Dur',
+                  ' + e, where e ~ N(0,',round(sum.hypo1$sigma,2),")")
+library(latex2exp)
+
+pred.int <- predict(hypo1, interval = "confidence")
+pred.int <- pred.int * attr(sc.info, 'scaled:scale')[7] + attr(sc.info, 'scaled:center')[7]
+
+mydata <- cbind(data.frame('AF'  = df$AF), pred.int)
+
+# PLOT: linear model
+p <- ggplot(mydata, aes(fit, AF)) +
+  stat_smooth(method = lm) +
+  geom_point(size = 2) +
+  xlab('Predicted Anoxic Factor [d per season]')+
+  ylab('Anoxic Factor [d per season]')+
+  theme_minimal()+
+  annotate("text", x = 61, y = 82.5, label = modeleq, size = 3)+
+  annotate("text", x = 50, y = 80, label = (paste0('R2 = ',round(sum.hypo1$r.squared,2))), size =3) +
+  theme(text = element_text(size=10),
+        axis.text.x = element_text(angle=0, hjust=1));p
+p.linear <- p + geom_line(aes(y = lwr), color = "red", linetype = "dashed")+
+  geom_line(aes(y = upr), color = "red", linetype = "dashed"); p.linear
+
+ggsave(file=paste0('../figs/linearModel.png'), p.linear, dpi = 300,width = 216,height = 216, units = 'mm')
+
+
 
 hyp.data2 <- hyp.data[, c(1,2,3,6,7)]
 
@@ -204,7 +239,7 @@ g7 <- ggplot(df,aes(discharge, AF)) +
   theme_minimal()
 g8 <- ggplot(df,aes(Clearwater.Duration, AF)) + 
   geom_point() +
-  xlab('Yahara Q (cfs)') + ylab('Anoxic factor (d)') +
+  xlab('Clearwater duration') + ylab('Anoxic factor (d)') +
   geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
@@ -214,7 +249,9 @@ g8 <- ggplot(df,aes(Clearwater.Duration, AF)) +
   theme_minimal()
 
 g <- (g1 + g2) / (g3 + g4)  / (g5 + g6) / (g7 + g8); g
-ggsave(plot = g, '../figs/comparison.png', dpi = 300, units = 'in', width = 7, height = 7)
+g <- (g1 + g4) / (g5 + g8)  / (p.linear) + plot_annotation(tag_levels = 'A') ; g
+ggsave(plot = g, '../figs/linear_comparison.png', dpi = 300, units = 'in', width = 7, height = 10)
+
 
 
 
@@ -289,4 +326,74 @@ g10 <- ggplot(df) +
   geom_point(aes(year, Clearwater.Duration)) +
   ylab('Clearwater dur. (days)') + xlab('') +
   theme_bw(); g5 / g6 / g7 / g9 /g10 /g8
-ggsave(plot = g5 / g6 / g7 / g9 / g10 /g8, '../figs/timeseries_comparison.png', dpi = 300, units = 'in', width = 7, height = 17)
+
+
+
+
+
+library(ggpubr)
+df.prior = df %>%
+  mutate('class' = ifelse(year < 2010, 'prior 2010','post 2010')) %>%
+  dplyr::select(class, AF, med, Jz, Days.0.5.mg.L, discharge, Clearwater.Duration)
+m.df.prior <- reshape2::melt(df.prior, id = 'class')
+
+compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'AF'))
+compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'AF'), method ="kruskal.test")
+
+p1 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'AF'), x = "class", y = "value",
+                palette = "jco", xlab = '', ylab = 'Anoxic Factor',
+                add = "jitter")
+#  Add p-value
+p1 = p1 + stat_compare_means()
+# Change method
+# p1 + stat_compare_means(method = "t.test")
+
+compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'med'))
+compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'med'), method ="kruskal.test")
+
+p2 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'med'), x = "class", y = "value",
+                 palette = "jco", xlab = '', ylab = 'Stratification duration',
+                 add = "jitter")
+#  Add p-value
+p2 = p2 + stat_compare_means()
+
+compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'Jz'))
+compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'Jz'), method ="kruskal.test")
+
+p3 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'Jz'), x = "class", y = "value",
+                 palette = "jco", xlab = '', ylab = 'Total oxygen sink',
+                 add = "jitter")
+#  Add p-value
+p3 = p3 + stat_compare_means()
+
+compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'Days.0.5.mg.L'))
+compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'Days.0.5.mg.L'), method ="kruskal.test")
+
+p4 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'Days.0.5.mg.L'), x = "class", y = "value",
+                 palette = "jco", xlab = '', ylab = 'Biomass over 0.5 mg/L',
+                 add = "jitter")
+#  Add p-value
+p4 = p4 + stat_compare_means()
+
+compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'discharge'))
+compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'discharge'), method ="kruskal.test")
+
+p5 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'discharge'), x = "class", y = "value",
+                 palette = "jco", xlab = '', ylab = 'Discharge',
+                 add = "jitter")
+#  Add p-value
+p5 = p5 + stat_compare_means()
+
+compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'Clearwater.Duration'))
+compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'Clearwater.Duration'), method ="kruskal.test")
+
+p6 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'Clearwater.Duration'), x = "class", y = "value",
+                 palette = "jco", xlab = '', ylab = 'Clearwater duration',
+                 add = "jitter")
+#  Add p-value
+p6 = p6 + stat_compare_means()
+
+(g5 / g6 / g7 / g9 / g10 /g8) | (p1 / p2 /p3 /p5/p6 /p4)
+
+
+ggsave(plot = (g5 / g6 / g7 / g9 / g10 /g8) | (p1 / p2 /p3 /p5/p6 /p4), '../figs/timeseries_comparison.png', dpi = 300, units = 'in', width = 20, height = 17)

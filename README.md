@@ -2,6 +2,6 @@
 
 ![](figs/timeseries_comparison.png)<!-- -->
 
-![](figs/comparison.png)<!-- -->
+![](figs/linear_comparison.png)<!-- -->
 
 ![](figs/model.png)<!-- -->
