@@ -259,6 +259,7 @@ g5 <- ggplot(df) +
   geom_line(aes(year, AF)) +
   geom_point(aes(year, AF)) +
   ylab('Anoxic Factor (days per season)') + xlab('') +
+  geom_vline(xintercept=2010, linetype = 'dashed') +
   theme_bw()
 g6 <- ggplot(df) +
   geom_ribbon(aes(x = year, ymin = constant.low, ymax = constant.high), fill = 'grey80') +
@@ -266,6 +267,7 @@ g6 <- ggplot(df) +
   geom_point(aes(x = year, y = linear)) +
   geom_line(aes(x = year, y = spline), linetype = 2, color = 'red3') +
   ylab('Stratification Duration (days)') + xlab('') +
+  geom_vline(xintercept=2010, linetype = 'dashed') +
   theme_bw()
 g7 <- ggplot(df, aes(year, Jz, col = 'Volumetric')) +
   geom_line(aes(year, Jv, col = 'Volumetric')) +
@@ -278,6 +280,7 @@ g7 <- ggplot(df, aes(year, Jz, col = 'Volumetric')) +
   geom_smooth(aes(year, Ja , col = 'Areal'), method = "loess", size = 1.5) +
   scale_y_continuous(sec.axis = sec_axis(~.*1, name = expression("Areal flux ["*g~m^{-2}*d^{-1}*"]"))) +
   ylab(expression("Volumetric flux ["*g~m^{-3}*d^{-1}*"]")) + xlab('') +
+  geom_vline(xintercept=2010, linetype = 'dashed') +
   theme_bw()+
   theme(axis.line.y.right = element_line(color = "red"),
         axis.ticks.y.right = element_line(color = "red"),
@@ -303,6 +306,7 @@ g8 <- ggplot(df) +
   ylab('Biomass over threshold (days per year)') + xlab('') +
   theme_bw()+
   theme(legend.position="bottom") +
+  geom_vline(xintercept=2010, linetype = 'dashed') +
   theme(legend.title=element_blank())
 # ggplot(coeff, aes(year, Ja, col = 'Volume')) +
 #   # geom_line(aes(year, Jv, col = 'Volume')) +
@@ -320,11 +324,13 @@ g9 <- ggplot(df) +
   geom_line(aes(year, discharge)) +
   geom_point(aes(year, discharge)) +
   ylab('Yahara Q (cfs)') + xlab('') +
+  geom_vline(xintercept=2010, linetype = 'dashed') +
   theme_bw(); 
 g10 <- ggplot(df) +
   geom_line(aes(year, Clearwater.Duration)) +
   geom_point(aes(year, Clearwater.Duration)) +
   ylab('Clearwater dur. (days)') + xlab('') +
+  geom_vline(xintercept=2010, linetype = 'dashed') +
   theme_bw(); g5 / g6 / g7 / g9 /g10 /g8
 
 
