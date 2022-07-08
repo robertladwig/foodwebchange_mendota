@@ -34,6 +34,7 @@ strat$linear <- yday(parse_date_time(x = strat$linear, orders = "ymd"))
 strat$constant.high <- yday(parse_date_time(x = strat$constant.high, orders = "ymd")) # note 2 of these are 1, so probably should be NA- 2008, 2016
 strat$constant.low <- yday(parse_date_time(x = strat$constant.low, orders = "ymd"))
 strat$spline <- yday(parse_date_time(x = strat$spline, orders = "ymd"))
+strat$mean <- rowMeans(strat[ ,-1])
 strat.onset <- strat
 
 strat <- read.csv(file = "output/stratification_end.csv")
@@ -41,6 +42,7 @@ strat$linear <- yday(parse_date_time(x = strat$linear, orders = "ymd"))
 strat$constant.high <- yday(parse_date_time(x = strat$constant.high, orders = "ymd")) # note 2 of these are 1, so probably should be NA- 2008, 2016
 strat$constant.low <- yday(parse_date_time(x = strat$constant.low, orders = "ymd"))
 strat$spline <- yday(parse_date_time(x = strat$spline, orders = "ymd"))
+strat$mean <- rowMeans(strat[ ,-1])
 strat.end <- strat
 
 strat <- make.empty.list.structure(ListNames = c(colnames(strat.onset)[-1]))
@@ -106,7 +108,7 @@ saveRDS(object = measured, file = save.season.assigned.measured.days)
 # interp data ----
 
 metrics <- data.frame("Year" = as.numeric(names(phyto)), "Cumulative.mg.L" = NA, "Ave.Daily.mg.L" = NA, "Total.Days" = NA)
-all.models <- make.empty.list.structure(ListNames = c("linear","constant.high","constant.low","spline"))
+all.models <- make.empty.list.structure(ListNames = c("linear","constant.high","constant.low","spline", "mean"))
 all.seasons <- make.empty.list.structure(ListNames = c("ice","spring","stratified","fall"))
 
 for (m in names(all.models)){
@@ -117,7 +119,7 @@ for (m in names(all.models)){
 }
 names(all.models)
 names(all.models$linear)
-head(all.models$linear$ice)
+head(all.models$mean$stratified)
 
 for (m in names(all.models)){
   for (s in names(all.seasons)){
@@ -142,13 +144,14 @@ all.models$linear$ice
 all.models$constant.high$spring
 all.models$constant.low$stratified
 all.models$spline$fall
+all.models$mean$spring
 
 all.models.interp <- all.models
 
 # measured data ----
 
 metrics <- data.frame("Year" = as.numeric(names(measured)), "Cumulative.mg.L" = NA, "Ave.Daily.mg.L" = NA, "Total.Days" = NA)
-all.models <- make.empty.list.structure(ListNames = c("linear","constant.high","constant.low","spline"))
+all.models <- make.empty.list.structure(ListNames = c("linear","constant.high","constant.low","spline","mean"))
 all.seasons <- make.empty.list.structure(ListNames = c("ice","spring","stratified","fall"))
 
 for (m in names(all.models)){
@@ -184,6 +187,7 @@ all.models$linear$ice
 all.models$constant.high$spring
 all.models$constant.low$stratified
 all.models$spline$fall
+all.models$mean$spring
 
 all.models.measured <- all.models
 
