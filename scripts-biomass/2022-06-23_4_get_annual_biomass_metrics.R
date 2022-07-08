@@ -7,12 +7,15 @@
 library(lubridate)
 
 phyto <- readRDS("robin-data/2022-06-09_annual_patterns/phyto-interp_split_by_year.rds")
+measured <- readRDS("robin-data/2022-06-09_annual_patterns/phyto_split_by_year.rds")
 strat <- read.csv(file = "output/stratification_start.csv")
 ice <- readRDS("~/Desktop/pop/data/environmental_data/Robin-Refined/ice/2-ice_seasons_split_by_year.rds")
 
 save.formatted.strat.dates <- "robin-data/2022-06-23_stratification_dates.rds"
 save.season.assigned.interp.days <- "robin-data/2022-06-23_biomass_metrics/phyto_interp_split-by-year_with_seasons.rds"
-save.season.biomass.metrics <- "robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season.rds"
+save.season.assigned.measured.days <- "robin-data/2022-06-23_biomass_metrics/phyto_measured_split-by-year_with_seasons.rds"
+save.season.biomass.metrics.interp <- "robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-interp_values.rds"
+save.season.biomass.metrics.measured <- "robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-measured_values.rds"
 save.quick.plots.folder <- "plots/2022-06-23_biomass_metrics_by_season/"
 
 # ---- format strat dates ----
@@ -50,7 +53,7 @@ for (n in names(strat)){
 saveRDS(object = strat, file = save.formatted.strat.dates)
 rm(strat.end, strat.onset)
 
-# ---- split into seasons ----
+# ---- split into seasons- interpolated ----
 
 phyto <- phyto[-1]
 names(phyto) # no 1995 in the strat info
@@ -71,13 +74,36 @@ for (yr in names(phyto)){
 }
 head(phyto$`2020`)
 
+# ---- split into seasons- measured ----
+
+measured <- measured[-1]
+names(measured) # no 1995 in the strat info
+
+for (yr in names(measured)){
+  my.phy <- measured[[yr]]
+  my.ice <- ice[ice$Summer.Year == as.numeric(yr), ]
+  for (m in names(strat)){
+    my.seas <- strat[[m]][strat[[m]]$year == as.numeric(yr), ]
+    my.phy$season <- "stratified"
+    my.phy$season[my.phy$yday < my.seas$start] <- "spring"
+    my.phy$season[my.phy$yday >= my.seas$end] <- "fall"
+    my.phy$season[my.phy$yday < yday(my.ice$Spring.Ice.Off)] <- "ice"
+    my.phy$season[my.phy$yday >= yday(my.ice$Fall.Ice.On)] <- "ice"
+    colnames(my.phy)[ncol(my.phy)] <- m
+  }
+  measured[[yr]] <- my.phy
+}
+head(measured$`2020`)
+
+
 # ---- export seasons ----
 
 saveRDS(object = phyto, file = save.season.assigned.interp.days)
+saveRDS(object = measured, file = save.season.assigned.measured.days)
 
 # ----- get metrics ----
 
-# total days
+# interp data ----
 
 metrics <- data.frame("Year" = as.numeric(names(phyto)), "Cumulative.mg.L" = NA, "Ave.Daily.mg.L" = NA, "Total.Days" = NA)
 all.models <- make.empty.list.structure(ListNames = c("linear","constant.high","constant.low","spline"))
@@ -100,10 +126,14 @@ for (m in names(all.models)){
       my.phy <- phyto[[yr]]
       my.col <- which(colnames(my.phy) == m)
       index.season <- my.phy[ ,m] == s
+      my.n <- sum(index.season)
       tot.biomass <- sum(my.phy[index.season,2])
+      if (my.n == 0){
+        tot.biomass <- NA
+      }
       all.models[[m]][[s]][y,"Cumulative.mg.L"] <- tot.biomass
-      all.models[[m]][[s]][y,"Total.Days"] <- sum(index.season)
-      all.models[[m]][[s]][y,"Ave.Daily.mg.L"] <- tot.biomass / sum(index.season)
+      all.models[[m]][[s]][y,"Total.Days"] <- my.n
+      all.models[[m]][[s]][y,"Ave.Daily.mg.L"] <- tot.biomass / my.n
     }
   }
 }
@@ -113,11 +143,71 @@ all.models$constant.high$spring
 all.models$constant.low$stratified
 all.models$spline$fall
 
+all.models.interp <- all.models
+
+# measured data ----
+
+metrics <- data.frame("Year" = as.numeric(names(measured)), "Cumulative.mg.L" = NA, "Ave.Daily.mg.L" = NA, "Total.Days" = NA)
+all.models <- make.empty.list.structure(ListNames = c("linear","constant.high","constant.low","spline"))
+all.seasons <- make.empty.list.structure(ListNames = c("ice","spring","stratified","fall"))
+
+for (m in names(all.models)){
+  all.models[[m]] <- all.seasons
+  for (s in names(all.seasons)){
+    all.models[[m]][[s]] <- metrics
+  }
+}
+names(all.models)
+names(all.models$linear)
+head(all.models$linear$ice)
+
+for (m in names(all.models)){
+  for (s in names(all.seasons)){
+    for (yr in names(measured)){
+      y <- which(metrics$Year == as.numeric(yr))
+      my.phy <- measured[[yr]]
+      my.col <- which(colnames(my.phy) == m)
+      index.season <- my.phy[ ,m] == s
+      my.n <- sum(index.season)
+      tot.biomass <- sum(my.phy[index.season,2])
+      if (my.n == 0){
+        tot.biomass <- NA
+      }
+      all.models[[m]][[s]][y,"Cumulative.mg.L"] <- tot.biomass
+      all.models[[m]][[s]][y,"Total.Days"] <- my.n
+      all.models[[m]][[s]][y,"Ave.Daily.mg.L"] <- tot.biomass / my.n
+    }
+  }
+}
+
+all.models$linear$ice
+all.models$constant.high$spring
+all.models$constant.low$stratified
+all.models$spline$fall
+
+all.models.measured <- all.models
+
+# ---- add true measured days to interp metrics ----
+
+for (m in names(all.models)){
+  for (s in names(all.seasons)){
+    my.interp <- all.models.interp[[m]][[s]]
+    
+    my.measured <- all.models.measured[[m]][[s]]
+    my.interp$Measured.Days <- my.measured$Total.Days
+    
+    all.models.interp[[m]][[s]] <- my.interp
+  }
+}
+
 # ---- export season biomass metrics ----
 
-saveRDS(object = all.models, file = save.season.biomass.metrics)
+saveRDS(object = all.models.interp, file = save.season.biomass.metrics.interp)
+saveRDS(object = all.models.measured, file = save.season.biomass.metrics.measured)
 
 # ---- quick looks ----
+
+all.models <- all.models.interp
 
 model.choice <- "linear"
 season.choice <- "stratified"
