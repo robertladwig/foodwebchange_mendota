@@ -4,6 +4,8 @@
 # Try sum total biomass instead of just high biomass days like I did before
 # try this during the stratified period and whole year, or starting at ice-off
 
+library(lubridate)
+
 phyto <- readRDS("robin-data/2022-06-09_annual_patterns/phyto-interp_split_by_year.rds")
 strat <- read.csv(file = "output/stratification_start.csv")
 ice <- readRDS("~/Desktop/pop/data/environmental_data/Robin-Refined/ice/2-ice_seasons_split_by_year.rds")
