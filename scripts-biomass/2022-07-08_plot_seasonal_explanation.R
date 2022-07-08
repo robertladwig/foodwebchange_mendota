@@ -22,9 +22,9 @@ plot.folder <- "plots/2022-07-08_biomass_by_season_boxplots/"
 
 # ---- black and white, side by side ----
 
-m <- "linear"
-exclude.if.few.samples <- FALSE
-include.jitter <- TRUE
+m <- "mean"
+exclude.if.few.samples <- TRUE
+include.jitter <- FALSE
 for (m in names(biomass)){
   ice <- biomass[[m]]$ice
   spring <- biomass[[m]]$spring
@@ -101,48 +101,4 @@ for (m in names(biomass)){
   dev.off()
 }
 
-# ---- polished single figure small----
-m <- "linear"
 
-ice <- biomass[[m]]$ice
-spring <- biomass[[m]]$spring
-strat <- biomass[[m]]$stratified
-fall <- biomass[[m]]$fall
-
-ice.cutoff <- 2
-spring.cutoff <- 2
-strat.cutoff <- 10
-fall.cutoff <- 2
-
-ice <- ice[!ice$Measured.Days < ice.cutoff, ]
-spring <- spring[!spring$Measured.Days < spring.cutoff, ]
-strat <- strat[!strat$Measured.Days < strat.cutoff, ]
-fall <- fall[!fall$Measured.Days < fall.cutoff, ]
-
-spring.pre <- spring[spring$Year <= 2009, ]
-spring.post <- spring[spring$Year >= 2010, ]
-strat.pre <- strat[strat$Year <= 2009, ]
-strat.post <- strat[strat$Year >= 2010, ]
-fall.pre <- fall[fall$Year <= 2009, ]
-fall.post <- fall[fall$Year >= 2010, ]
-
-av.bio <- list(spring.pre$Ave.Daily.mg.L, spring.post$Ave.Daily.mg.L, 
-               strat.pre$Ave.Daily.mg.L, strat.post$Ave.Daily.mg.L, 
-               fall.pre$Ave.Daily.mg.L, fall.post$Ave.Daily.mg.L)
-names(av.bio) <- c("spring.pre","spring.post","strat.pre","strat.post","fall.pre","fall.post")
-
-pdf(file = paste0(plot.folder, "/fig3_linear-small.pdf"), width = 3, height = 3)
-
-par(mar = c(2,3.5,.2,.2), oma = c(.1,.1,.1,.1),mfrow = c(1,1))
-
-boxplot(x = av.bio, notch = F, range = 0, lty = 1, axes = F, at = c(1,2,4,5,7,8))
-axis(side = 2, las = 2)
-axis(side = 1, at = c(1.5, 4.5, 7.5), labels = F)
-box()
-mtext(text = c("Spring","Stratified","Fall"), side = 1, line = .75, at = c(1.5, 4.5, 7.5), xpd = T)
-mtext(text = "Average Biomass (mg/L)", side = 2, outer = F, line = 2.5)
-
-dev.off()
-
-
-# ----
