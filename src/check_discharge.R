@@ -46,7 +46,7 @@ mapview(siteINFO.sf, layer.name="USGS 05427718 YAHARA RIVER AT WINDSOR, WI")
 # statistic code (statCd) to filter the results. The default for both is to
 # return all possible values (all). The returned count_nu for "uv" data is the
 # count of days with returned data, not the actual count of returned values.
-???
+
 # Table 3: Commonly used USGS Stat Codes
 # StatCode	shortName
 # 00001	Maximum
@@ -120,9 +120,12 @@ p1/p2
 df <- yahara.daily2 %>%
   mutate(year = year(Date)) %>%
   group_by(year) %>%
-  summarise(mean = mean(meanDischarge, na.rm = T))
+  summarise(discharge = mean(meanDischarge, na.rm = T),
+            max.discharge = max(meanDischarge, na.rm = T),
+            min.discharge = min(meanDischarge, na.rm = T),
+            precip = mean(sumPrecip, na.rm = T))
 
-ggplot(df, aes(year, mean)) +
+ggplot(df, aes(year, max.discharge)) +
   geom_line()
 
 write_csv(df, '../output/discharge.csv')
