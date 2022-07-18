@@ -62,8 +62,10 @@ col.post <- "orange3"
 
 # pdf(file = paste0(plot.folder,"/Figure_3-biomass_by_season.pdf"), 
 #     width = 7, height = 3)
-pdf(file = paste0("figs/Figure_3-biomass_by_season.pdf"), 
+pdf(file = paste0("figs/Figure_3-biomass_by_season.pdf"),
     width = 7, height = 3)
+# png(filename = paste0("figs/Figure_3-biomass_by_season.png"), 
+#     width = 7, height = 3, units = "in", res = 100)
 
 par(mar = c(1.75,3,.5,2), oma = c(.1,.1,.1,.1))
 par(fig = c(0,.42,0,1))
