@@ -7,4 +7,3 @@ foodwebchange_mendota.Rproj
 # make soft link to plots folder in dropbox:
 # ln -s /Users/rohwer/Dropbox/Research/data-pointed-to-by-git-repos/foodwebchange_mendota/plots plots
 plots
-robin-data
