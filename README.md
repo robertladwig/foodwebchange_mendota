@@ -5,3 +5,5 @@
 ![](figs/linear_comparison.png)<!-- -->
 
 ![](figs/model.png)<!-- -->
+
+![](figs/Figure_3-biomass_by_season.png)<!-- -->
