@@ -16,6 +16,7 @@ save.season.assigned.interp.days <- "robin-data/2022-06-23_biomass_metrics/phyto
 save.season.assigned.measured.days <- "robin-data/2022-06-23_biomass_metrics/phyto_measured_split-by-year_with_seasons.rds"
 save.season.biomass.metrics.interp <- "robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-interp_values.rds"
 save.season.biomass.metrics.measured <- "robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-measured_values.rds"
+save.season.biomass.individual.measurements <- "robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-individual_measurements"
 save.quick.plots.folder <- "plots/2022-06-23_biomass_metrics_by_season/"
 
 # ---- format strat dates ----
@@ -191,6 +192,44 @@ all.models$mean$spring
 
 all.models.measured <- all.models
 
+# measured data - Keep exact measurements, just reformat no stats ----
+
+metrics <- data.frame("year" = 2050, "date" = parse_date_time("2050-1-1","ymd"),"biomass" = 0)
+all.models <- make.empty.list.structure(ListNames = c("linear","constant.high","constant.low","spline","mean"))
+all.seasons <- make.empty.list.structure(ListNames = c("ice","spring","stratified","fall"))
+
+for (m in names(all.models)){
+  all.models[[m]] <- all.seasons
+  for (s in names(all.seasons)){
+    all.models[[m]][[s]] <- metrics
+  }
+}
+names(all.models)
+names(all.models$linear)
+head(all.models$linear$ice)
+
+for (m in names(all.models)){
+  for (s in names(all.seasons)){
+    for (yr in names(measured)){
+      my.phy <- measured[[yr]]
+      my.col <- which(colnames(my.phy) == m)
+      index.season <- my.phy[ ,m] == s
+      my.seas <- my.phy[index.season, c("year","date","biomass")]
+      all.models[[m]][[s]] <- rbind(all.models[[m]][[s]], my.seas) 
+    }
+    index.placeholder <- which(all.models[[m]][[s]]$year == 2050)
+    all.models[[m]][[s]] <- all.models[[m]][[s]][-index.placeholder, ]
+  }
+}
+
+all.models$linear$ice
+all.models$constant.high$spring
+all.models$constant.low$stratified
+all.models$spline$fall
+all.models$mean$spring
+
+all.models.individ.measurements <- all.models
+
 # ---- add true measured days to interp metrics ----
 
 for (m in names(all.models)){
@@ -208,6 +247,7 @@ for (m in names(all.models)){
 
 saveRDS(object = all.models.interp, file = save.season.biomass.metrics.interp)
 saveRDS(object = all.models.measured, file = save.season.biomass.metrics.measured)
+saveRDS(object = all.models.individ.measurements, file = save.season.biomass.individual.measurements)
 
 # ---- quick looks ----
 
