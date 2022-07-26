@@ -9,9 +9,8 @@ names(phyto.list)
 key <- readRDS("robin-data/2022-07-25_season_dates/seasons_by_sample.rds")
 
 my.dates <- phyto.list$tot$date
-my.dates.seas <- my.dates[year(my.dates) != 1995] # nno strat stats for 1995
-index.pre <- year(my.dates.seas) < 2010
-index.post <- year(my.dates.seas) >= 2010
+index.pre <- year(my.dates) < 2010
+index.post <- year(my.dates) >= 2010
 
 i.ice <- key$Season == "ice-on"
 i.spring <- key$Season == "spring"
@@ -26,6 +25,15 @@ x.ax.lab <- x.ax[index]
 
 t = 2
 r = 1
+
+# manually add total plot - diff structure
+t = 1
+folder.name <- paste0("plots/2022-07-25_taxa_over_time_plots/",t,"-",names(phyto.list)[t])
+my.tax <- phyto.list[[t]]$biomass
+my.name <- "Total"
+# and run the figure part of the loop only
+
+
 for (t in 2:length(phyto.list)){
   folder.name <- paste0("plots/2022-07-25_taxa_over_time_plots/",t,"-",names(phyto.list)[t])
   for (r in 1:nrow(phyto.list[[t]])){
