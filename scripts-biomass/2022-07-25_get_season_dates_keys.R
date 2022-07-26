@@ -41,8 +41,9 @@ head(season.dates)
 
 # ---- assign season to each biomass sample date ----
 
-sample.dates <- data.frame("Year" = year(phyto.list$tot$date), "Yday" = yday(phyto.list$tot$date))
-sample.dates <- sample.dates[sample.dates$Year != 1995, ] # 1995 is missing from stratification info
+sample.dates <- data.frame("Year" = year(phyto.list$tot$date), "Yday" = yday(phyto.list$tot$date), "Date" = phyto.list$tot$date)
+missing.dates <- sample.dates[sample.dates$Year == 1995, ] # 1995 is missing from stratification info
+sample.dates <- sample.dates[sample.dates$Year != 1995, ] 
 
 sample.dates$Season <- "stratified"
 
@@ -64,6 +65,13 @@ for (yr in unique(sample.dates$Year)){
   
   sample.dates[sample.dates$Year == yr, ] <- my.dates
 }
+
+# -- add back the unknown dates so key matches phyto.list rows ----
+
+missing.dates$Season <- "unknown"
+sample.dates <- rbind(missing.dates, sample.dates)
+
+
 
 # ---- save data ----
 
