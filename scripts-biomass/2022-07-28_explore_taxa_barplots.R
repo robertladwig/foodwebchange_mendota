@@ -50,14 +50,14 @@ phyto <- phyto[index, ]
 col.key <- col.key[index, ]
 all.equal(row.names(spring), col.key$taxa)
 
-barplot(spring, las  = 2, cex.names = .5, legend = F, col = col.key$color)
+barplot(spring, las  = 2, cex.names = .5, legend = F, col = col.key$color, border = NA)
 
 fall <- phyto[ ,key$Season == "fall"]
 fall[is.na(fall)] <- 0
 
 all.equal(row.names(fall), col.key$taxa)
 
-barplot(fall, las  = 2, cex.names = .5, legend = F, col = col.key$color)
+barplot(fall, las  = 2, cex.names = .5, legend = F, col = col.key$color, border = NA)
 
 
 stratified <- phyto[ ,key$Season == "stratified"]
@@ -65,4 +65,63 @@ stratified[is.na(stratified)] <- 0
 
 all.equal(row.names(stratified), col.key$taxa)
 
-barplot(stratified, las  = 2, cex.names = .5, legend = F, col = col.key$color)
+barplot(stratified, las  = 2, cex.names = .5, legend = F, col = col.key$color, border = NA)
+
+# ---- average by year ----
+
+spring[1:5,1:5]
+
+get.yearly.av <- function(my.phy){
+  my.phy <- t(my.phy)
+  my.phy <- as.data.frame(my.phy)
+  agg.by.year <- as.numeric(substr(row.names(my.phy),start = 1, stop = 4))
+  my.phy.av <- aggregate(x = my.phy, by = list(agg.by.year), FUN = mean)
+  my.phy.av[1:5,1:5]
+  row.names(my.phy.av) <- my.phy.av[ ,1]
+  my.phy.av <- my.phy.av[ ,-1]
+  my.phy.av <- as.matrix(t(my.phy.av))
+  return(my.phy.av)
+}
+
+spring.av <- get.yearly.av(my.phy = spring)
+all.equal(row.names(spring.av), col.key$taxa)
+barplot(spring.av, col = col.key$color, border = NA, las = 2)
+
+stratified.av <- get.yearly.av(my.phy = stratified)
+all.equal(row.names(stratified.av), col.key$taxa)
+barplot(stratified.av, col = col.key$color, border = NA, las = 2)
+
+fall.av <- get.yearly.av(my.phy = fall)
+all.equal(row.names(fall.av), col.key$taxa)
+barplot(fall.av, col = col.key$color, border = NA, las = 2)
+
+# ---- make a prettier plot ----
+
+par(mar = c(1,2,.1,0), oma = c(0,0,0,0))
+
+par(fig = c(0,.8,.65,.95))
+barplot(spring.av, col = col.key$color, border = NA, las = 2, names.arg = rep("",ncol(spring.av)), axes = F)
+axis(side = 2, line = -.5, las = 2, cex.axis = .7,tck = -.05, labels = F)
+axis(side = 2, lwd = 0, line = -1, las = 2, cex.axis = .7)
+mtext(text = "Spring", side = 3, line = -1, at = 3)
+
+par(fig = c(0,.8,.35,.65), new = T)
+barplot(stratified.av, col = col.key$color, border = NA, las = 2, names.arg = rep("",ncol(stratified.av)), axes = F)
+axis(side = 2, line = -.5, las = 2, cex.axis = .7,tck = -.05, labels = F)
+axis(side = 2, lwd = 0, line = -1, las = 2, cex.axis = .7)
+mtext(text = "Biomass (mg/L)", side = 2, line = 1)
+mtext(text = "Stratified", side = 3, line = -1, at = 3)
+
+par(fig = c(0,.8,.05,.35), new = T)
+bar.spots <- barplot(fall.av, col = col.key$color, border = NA, las = 2, names.arg = rep("",ncol(fall.av)), axes = F)
+axis(side = 2, line = -.5, las = 2, cex.axis = .7,tck = -.05, labels = F)
+axis(side = 2, lwd = 0, line = -1, las = 2, cex.axis = .7)
+mtext(text = "Fall", side = 3, line = -1, at = 3)
+text(x = bar.spots, y = -1.25, labels = colnames(fall.av), xpd = NA, srt = 90, adj = 1, cex = .7)
+
+par(fig = c(.8,1,.3,.7), new = T, mar = c(0,0,0,0))
+plot(1:10,1:10, type = "n", ann = F, axes = F)
+lab.locs <- seq(from = 0, to = 10, along.with = rownames(spring.av))
+text(x = 3, y = lab.locs, labels = row.names(spring.av), cex = .7, xpd = NA, adj = 0)
+rect(xleft = 1.25, xright = 2.5, ybottom = lab.locs - .3, ytop = lab.locs +.3, 
+     col = col.key$color, xpd = NA, border = NA)
