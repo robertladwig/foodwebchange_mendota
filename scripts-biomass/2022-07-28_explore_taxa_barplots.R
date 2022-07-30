@@ -39,7 +39,8 @@ col.key$color[col.key$taxa == "Haptophyta"] <- adjustcolor(rainbow(n = 20, v = .
 
 # ----
 
-barplot(phyto)
+barplot(phyto, border = NA, col = col.key$color, las = 2, cex.names = .5)
+all.equal(row.names(phyto), col.key$taxa)
 
 spring <- phyto[ ,key$Season == "spring"]
 spring[is.na(spring)] <- 0
@@ -141,3 +142,4 @@ lab.locs <- seq(from = 0, to = 10, along.with = rownames(spring.av))
 text(x = 3, y = lab.locs, labels = row.names(spring.av), cex = .7, xpd = NA, adj = 0)
 rect(xleft = 1.25, xright = 2.5, ybottom = lab.locs - .3, ytop = lab.locs +.3, 
      col = col.key$color, xpd = NA, border = NA)
+
