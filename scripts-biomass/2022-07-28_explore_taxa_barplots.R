@@ -83,17 +83,33 @@ get.yearly.av <- function(my.phy){
   return(my.phy.av)
 }
 
+
 spring.av <- get.yearly.av(my.phy = spring)
 all.equal(row.names(spring.av), col.key$taxa)
+setdiff(x = 1996:2020, y = colnames(spring.av)) # missing 2017
 barplot(spring.av, col = col.key$color, border = NA, las = 2)
 
 stratified.av <- get.yearly.av(my.phy = stratified)
 all.equal(row.names(stratified.av), col.key$taxa)
 barplot(stratified.av, col = col.key$color, border = NA, las = 2)
+setdiff(x = 1996:2020, y = colnames(stratified.av))
 
 fall.av <- get.yearly.av(my.phy = fall)
 all.equal(row.names(fall.av), col.key$taxa)
 barplot(fall.av, col = col.key$color, border = NA, las = 2)
+setdiff(x = 1996:2020, y = colnames(fall.av)) # missing 2000, 2001, 2014
+
+# ---- add missing year placeholders ----
+
+spring.av <- cbind(spring.av[ ,1:21], 
+                   "2017" = NA, 
+                   spring.av[ ,22:ncol(spring.av)])
+
+fall.av <- cbind(fall.av[ ,1:4], 
+                 "2000" = NA, "2001" = NA, 
+                 fall.av[ ,5:16],
+                 "2014" = NA,
+                 fall.av[ ,17:ncol(fall.av)])
 
 # ---- make a prettier plot ----
 
