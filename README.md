@@ -7,3 +7,5 @@
 ![](figs/model.png)<!-- -->
 
 ![](figs/Figure_3-biomass_by_season.png)<!-- -->
+
+![](figs/season_barplots.png)<!-- -->
