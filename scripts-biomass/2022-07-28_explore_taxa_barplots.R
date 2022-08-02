@@ -114,6 +114,9 @@ fall.av <- cbind(fall.av[ ,1:4],
 
 # ---- make a prettier plot ----
 
+# pdf(file = "plots/2022-07-28_taxa_composition_plots/season_barplots.pdf", width = 6.5, height = 5)
+png(filename = "figs/season_barplots.png", width = 6.5, height = 5, units = "in", res = 300)
+
 par(mar = c(1,2,.1,0), oma = c(0,0,0,0))
 
 par(fig = c(0,.8,.65,.95))
@@ -143,3 +146,4 @@ text(x = 3, y = lab.locs, labels = row.names(spring.av), cex = .7, xpd = NA, adj
 rect(xleft = 1.25, xright = 2.5, ybottom = lab.locs - .3, ytop = lab.locs +.3, 
      col = col.key$color, xpd = NA, border = NA)
 
+dev.off()
