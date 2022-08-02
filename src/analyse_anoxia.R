@@ -36,6 +36,9 @@ discharge <- read_csv('../output/discharge.csv')
 
 cw <- readRDS('../data/yearly_clearwater_stats.rds')
 
+nutrients <- read_csv('../output/nutrients.csv')
+
+
 df.strat <- strat %>%
   group_by(year) %>%
   mutate(med = mean(linear, constant.low, constant.high, spline)) %>%
@@ -53,6 +56,10 @@ df.biomass <- biomass %>%
   dplyr::filter(Year != 1995 & Year != 2021) %>%
   rename(year = Year)
 
+df.nutrients <- nutrients %>%
+  dplyr::filter(year != 1995 & year != 2021) %>%
+  rename(year = year)
+
 df.discharge <- discharge %>%
   dplyr::filter(year != 1995 & year != 2021) 
 
@@ -65,6 +72,7 @@ df <- merge(df, df.flux, by = 'year')
 df <- merge(df, df.biomass, by = 'year')
 df <- merge(df, df.discharge, by = 'year')
 df <- merge(df, df.cw, by = 'year')
+df <- merge(df, df.nutrients, by = 'year')
 
 
 mod <- lm(AF ~ med + Days.0.5.mg.L + Jz, data = df)
@@ -331,7 +339,38 @@ g10 <- ggplot(df) +
   geom_point(aes(year, Clearwater.Duration)) +
   ylab('Clearwater dur. (days)') + xlab('') +
   geom_vline(xintercept=2010, linetype = 'dashed') +
-  theme_bw(); g5 / g6 / g7 / g9 /g10 /g8
+  theme_bw(); 
+g11 <- ggplot(df) +
+  geom_line(aes(year, pH)) +
+  geom_point(aes(year, pH)) +
+  ylab('pH (-)') + xlab('') +
+  geom_vline(xintercept=2010, linetype = 'dashed') +
+  theme_bw(); 
+g12 <- ggplot(df) +
+  geom_line(aes(year, PO4.P_surf , col = 'surface')) +
+  geom_point(aes(year, PO4.P_surf , col = 'surface')) +
+  geom_line(aes(year, PO4.P_bot , col = 'bottom')) +
+  geom_point(aes(year, PO4.P_bot, col  = 'bottom')) +
+  ylab('Phosphate (mg/L)') + xlab('') +
+  geom_vline(xintercept=2010, linetype = 'dashed') +
+  theme_bw(); 
+g13 <- ggplot(df) +
+  geom_line(aes(year, NO3.NO2.N_surf, col = 'surface' )) +
+  geom_point(aes(year, NO3.NO2.N_surf , col = 'surface')) +
+  geom_line(aes(year, NO3.NO2.N_bot, col = 'bottom' )) +
+  geom_point(aes(year, NO3.NO2.N_bot , col = 'bottom')) +
+  ylab('Nitrate (mg/L)') + xlab('') +
+  geom_vline(xintercept=2010, linetype = 'dashed') +
+  theme_bw(); 
+g14 <- ggplot(df) +
+  geom_line(aes(year, RSi)) +
+  geom_point(aes(year, RSi)) +
+  ylab('React. Silica (mg/L)') + xlab('') +
+  geom_vline(xintercept=2010, linetype = 'dashed') +
+  theme_bw(); 
+
+
+g5 / g6 / g7 / g9 /g10 /g8 / g11 /g12 /g13/ g14
 
 
 
@@ -340,7 +379,7 @@ g10 <- ggplot(df) +
 library(ggpubr)
 df.prior = df %>%
   mutate('class' = ifelse(year < 2010, 'prior 2010','post 2010')) %>%
-  dplyr::select(class, AF, med, Jz, Days.0.5.mg.L, discharge, Clearwater.Duration)
+  dplyr::select(class, AF, med, Jz, Days.0.5.mg.L, discharge, Clearwater.Duration, pH, PO4.P_surf, NO3.NO2.N_surf, RSi)
 m.df.prior <- reshape2::melt(df.prior, id = 'class')
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'AF'))
@@ -399,7 +438,99 @@ p6 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'Clearwater.Duration')
 #  Add p-value
 p6 = p6 + stat_compare_means()
 
-(g5 / g6 / g7 / g9 / g10 /g8) | (p1 / p2 /p3 /p5/p6 /p4)
+compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'pH'))
+compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'pH'), method ="kruskal.test")
+
+p7 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'pH'), x = "class", y = "value",
+                 palette = "jco", xlab = '', ylab = 'pH',
+                 add = "jitter")
+#  Add p-value
+p7 = p7 + stat_compare_means()
+
+compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'PO4.P_surf'))
+compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'PO4.P_surf'), method ="kruskal.test")
+
+p8 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'PO4.P_surf'), x = "class", y = "value",
+                 palette = "jco", xlab = '', ylab = 'PO4-P surf',
+                 add = "jitter")
+#  Add p-value
+p8 = p8 + stat_compare_means()
+
+compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'NO3.NO2.N_surf'))
+compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'NO3.NO2.N_surf'), method ="kruskal.test")
+
+p9 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'NO3.NO2.N_surf'), x = "class", y = "value",
+                 palette = "jco", xlab = '', ylab = 'NO3-NO2-N surf',
+                 add = "jitter")
+#  Add p-value
+p9 = p9 + stat_compare_means()
+
+compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'RSi'))
+compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'RSi'), method ="kruskal.test")
+
+p10 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'RSi'), x = "class", y = "value",
+                 palette = "jco", xlab = '', ylab = 'RSi',
+                 add = "jitter")
+#  Add p-value
+p10 = p10 + stat_compare_means()
+
+(g5 / g6 / g7 / g9 / g10 /g8 / g11 /g12 /g13/ g14 ) | (p1 / p2 /p3 /p5/p6 /p4 /p7 / p8  / p9 /p10)
 
 
 ggsave(plot = (g5 / g6 / g7 / g9 / g10 /g8) | (p1 / p2 /p3 /p5/p6 /p4), '../figs/timeseries_comparison.png', dpi = 300, units = 'in', width = 20, height = 17)
+
+ggsave(plot = (g5 / g6 / g7 / g9 / g10 /g8 / g11 /g12 /g13/ g14 ) | (p1 / p2 /p3 /p5/p6 /p4 /p7 / p8  / p9 /p10) + plot_layout(guides = 'collect'), '../figs/timeseries_comparison.png', dpi = 300, units = 'in', width = 20, height = 30)
+
+
+# find breaking point
+library(bfast)
+library(zoo)
+library(strucchange)
+library(xts)
+
+ts.af =  ts(df$AF, start= 1996, frequency = 1)
+
+plot(ts.af)
+
+plot(merge(
+       AF = as.zoo(ts.af),
+       zoo(mean(AF), time(AF)),
+       CUSUM = cumsum(AF - mean(AF)),
+       zoo(0, time(AF)),
+       MOSUM = rollapply(AF - mean(AF), 4, sum),
+       zoo(0, time(AF))
+     ), screen = c(1, 1, 2, 2, 3, 3), main = "", xlab = "Time",
+  col = c(1, 4, 1, 4, 1, 4) )
+
+plot(merge(
+        AF = as.zoo(ts.af),
+        zoo(c(NA, cumsum(head(AF, -1))/1:99), time(AF)),
+        CUSUM = cumsum(c(0, recresid(lm(AF ~ 1)))),
+        zoo(0, time(AF))
+      ), screen = c(1, 1, 2, 2), main = "", xlab = "Time",
+   col = c(1, 4, 1, 4) )
+
+AF = as.zoo(ts.af)
+plot(1996 + 4:25, sapply(4:25, function(i) {
+  before <- 1:i
+  after <- (i+1):4
+  res <- c(AF[before] - mean(AF[before]), AF[after] - mean(AF[after]))
+   sum(res^2)
+   }), type = "b", xlab = "Time", ylab = "RSS")
+
+bp.nile <- breakpoints(AF ~ 1)
+nile.fac <- breakfactor(bp.nile, breaks = 1 )
+fm1.nile <- lm(AF ~ nile.fac - 1)
+plot(bp.nile)
+
+ocus.nile <- efp(AF ~ 1, type = "OLS-CUSUM")
+
+png(file = "../figs/Fig_Breakpoint.png",res = 300,width = 216,height = 216, units = 'mm')
+opar <- par(mfrow=c(2,1), mar=c(2,2,0,2))
+plot(ocus.nile, alt.boundary=F,main="")
+abline(v= 2010, lty=2, col='red')
+plot(AF, ylab="Annual Flow of the river Nile") > abline(h= mean(AF),col='blue')
+abline(v= 2010, lty=2, col='red')
+lines(ts(predict(fm1.nile),start=1996,freq=1), col='darkgreen',lwd=2)
+par(opar)
+dev.off()
