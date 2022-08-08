@@ -6,6 +6,7 @@ library(pracma)
 library(lubridate)
 library(reshape2)
 library(patchwork) # Plot all lakes 
+library(rLakeAnalyzer)
 
 # Package ID: knb-lter-ntl.29.30 Cataloging System:https://pasta.edirepository.org.
 # Data set title: North Temperate Lakes LTER: Physical Limnology of Primary Study Lakes 1981 - current.
@@ -106,6 +107,7 @@ p.end.ribbon = list() # for figures
 p.duration.ribbon = list() # for figures 
 lake.strat.list = list() # for data
 
+
 lakes =  c('ME')
 
 for (ll in 1:length(lakes)) {
@@ -180,6 +182,53 @@ do.constant.1 = interp.method(method = 'constant.1')
 do.constant.2 = interp.method(method = 'constant.2')
 do.linear = interp.method(method = 'linear')
 do.spline = interp.method(method = 'spline')
+
+get_ssi_first <- function(data){
+  hypso <- read_csv('../data/LakeEnsemblR_bathymetry_standard.csv')
+  H <- hypso$Depth_meter
+  A <- hypso$Area_meterSquared
+  
+  areas <- approx(H, A, unique(data$depth))$y
+  depths = unique(data$depth)
+  
+  df.hyp <-  data.frame('depths' = depths, 'areas' = areas)
+  
+  bath = data.frame('depths' = depths, 'areas' = areas)
+  
+  df.ssi <- matrix(NA, ncol = 1 + nrow(do.spline$sim), nrow = length(data$time) * length(data$depth))
+  df.ssi = data.frame(df.ssi)
+  colnames(df.ssi) <- c('datetime' ,# 'depth',
+    paste0('wtr_',seq(1:nrow(do.spline$sim))))
+  df.ssi$datetime = rep(data$time)#, each = length(data$depth))
+  # df.ssi$depth = rep(data$depth,  length(data$time))
+  
+  for (i in seq(1:nrow(do.spline$sim))){
+    df.ssi[,1+i] = data$sim[i,]
+  }
+  
+  ssi <- ts.schmidt.stability(wtr = df.ssi, bathy = df.hyp)
+  
+  ggplot(ssi) + geom_line(aes(datetime, schmidt.stability
+                              )) + xlim(as.Date('2010-01-01'), as.Date('2010-12-31'))
+  
+  max.ssi <-  ssi%>%
+    mutate(year = year(datetime), doy = lubridate::yday(datetime)) %>%
+    group_by(year) %>% 
+    summarise(max.ssi = max(schmidt.stability))
+  
+  ssi.na <- ssi
+  ssi.na$schmidt.stability = ifelse(ssi.na$schmidt.stability > mean(max.ssi$max.ssi)*0.1, ssi.na$schmidt.stability, NA)
+  
+  df =  ssi.na%>%
+    mutate(year = year(datetime), doy = lubridate::yday(datetime)) %>%
+    group_by(year) %>% 
+    summarise(schmidt.start = attributes(na.contiguous(schmidt.stability))$tsp[1])
+  return(df)
+}
+
+df.ssi = get_ssi_first(do.spline)
+
+
 
 strat.constant.1 <- output_stratdur(df = do.constant.1)
 strat.constant.2 <- output_stratdur(df = do.constant.2)
@@ -282,6 +331,7 @@ write_csv(strat.duration,'../output/stratification.csv')
 write_csv(strat.start,'../output/stratification_start.csv')
 write_csv(strat.end,'../output/stratification_end.csv')
 
+write_csv(df.ssi, '../output/ssi_startdate100.csv')
 
 # Ribbon plots 
 wrap_plots(p.duration.ribbon) + 
@@ -295,4 +345,5 @@ ggsave(filename = '../figs/LTERstrat.start.ribbon.png',width = 10,height = 6)
 wrap_plots(p.end.ribbon) + 
   plot_layout(guides = "collect")
 ggsave(filename = '../figs/LTERstrat.end.ribbon.png',width = 10,height = 6)
+
 

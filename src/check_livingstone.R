@@ -153,6 +153,10 @@ anoxicfactor = data.frame('year' = NULL,
                           'AF' = NULL,
                           'id' = NULL)
 
+df.lag = data.frame('year' = NULL,
+           'timelag' = NULL,
+           'id' = NULL)
+
 hypso <- read_csv('../data/LakeEnsemblR_bathymetry_standard.csv')
 H <- hypso$Depth_meter
 A <- hypso$Area_meterSquared
@@ -195,6 +199,8 @@ strat.onset <- read_csv('../output/stratification_start.csv')
 strat.onset = strat.onset %>%
   group_by(year) %>%
   mutate(mean = mean(yday(linear), yday(constant.high), yday(constant.low), yday(spline)))
+
+ssi.start <- read_csv('../output/ssi_startdate100.csv')
 
 
 for (id.year in unique(df$year4)[-1]){
@@ -248,6 +254,8 @@ for (id.year in unique(df$year4)[-1]){
   absdiff <- (abs(yday(unique(obs$sampledate)) - strat.onset.date)) #yday('1989-04-15')
   max.date2 <- which.min(absdiff)
   
+  ssi.start.date <- ssi.start$schmidt.start[match(id.year, ssi.start$year)]
+  
   if (max.date > max.date2){
     max.date <- max.date
   } else {
@@ -295,10 +303,17 @@ for (id.year in unique(df$year4)[-1]){
 
 
     start = dat2[j,1]
-    end = dat2[j, which(dat2[1,] < thresh)[1]]
+    end = dat2[j, which(dat2[j,] < thresh)[1]]
 
     start.time = times[1]
-    end.time = times[which(dat2[1,] < thresh)[1]]
+    end.time = times[which(dat2[j,] < thresh)[1]]
+    
+    if (j == nrow(dat2)){
+      df.lag <- rbind(df.lag, data.frame('year' = id.year,
+                                         'timelag' = end.time - ssi.start.date,#strat.onset.date,
+                                         'id' = 'ME'))
+    }
+
 
     if (all(dat2[j,] > 1)){
       next
@@ -420,3 +435,4 @@ ggsave(plot = g1 / g2, '../figs/livingstone_fluxes.png', dpi = 300, units = 'in'
 
 write_csv(anoxicfactor, '../output/anoxicfactor.csv')
 write_csv(coeff, '../output/dosinks.csv')
+write_csv(df.lag, '../output/timelag.csv')
