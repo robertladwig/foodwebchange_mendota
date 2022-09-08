@@ -487,6 +487,7 @@ library(bfast)
 library(zoo)
 library(strucchange)
 library(xts)
+# https://r-forge.r-project.org/scm/viewvc.php/*checkout*/tutorial/TutorialExplainingStrucChangeBasics.pdf?root=bfast
 
 ts.af =  ts(df$AF, start= 1996, frequency = 1)
 
@@ -534,3 +535,59 @@ abline(v= 2010, lty=2, col='red')
 lines(ts(predict(fm1.nile),start=1996,freq=1), col='darkgreen',lwd=2)
 par(opar)
 dev.off()
+
+
+# https://rpubs.com/richkt/269908
+options(warn=-1)
+library(changepoint)
+
+cptfn <- function(data, pen) {
+  ans <- cpt.mean(data, test.stat="Normal", method = "PELT", penalty = "Manual", pen.value = pen) 
+  length(cpts(ans)) +1
+}
+
+# evaluate and plot results:
+plot.new()
+frame()
+par(mfcol=c(2,1))
+# run cptfn for the signal with a known change point
+pen.vals <- seq(0, 12,.2)
+elbowplotData <- unlist(lapply(pen.vals, function(p) 
+  cptfn(data = ts.af, pen = p)))
+plot.ts(ts.af,type='l',col='red',
+        xlab = "time",
+        ylab = " Y(t)",
+        main = "Stationary signal (constant mean)")
+plot(pen.vals,elbowplotData, 
+     xlab = "PELT penalty parameter",
+     ylab = " ",
+     main = " ")
+
+penalty.val <-6 # this value is determined from elbow plots
+
+cptm_stationary <- cpt.mean(ts.af,    penalty='Manual',pen.value=penalty.val,method='PELT') 
+cpts_stationary <- cpts(cptm_stationary) # change point time points
+
+plot.new()
+frame()
+par(mfcol=c(1,1))
+plot(cptm_stationary,
+     xlab = "time",
+     ylab = " Y(t)",
+     main = "Change in mean signal")
+# plot(cptm_stationary)
+
+plot.new()
+frame()
+par(mfcol=c(1,1))
+acf(ts.af,lag.max = length(ts.af),
+    xlab = "lag #", ylab = 'ACF', main=' ')
+
+# https://kevin-kotze.gitlab.io/tsm/ts-2-tut/
+plot.ts(ts.af)
+v_pelt <- cpt.var(ts.af, penalty='Manual',pen.value=penalty.val, method = "PELT")
+plot(v_pelt, type = "l", cpt.col = "blue", xlab = "Index", cpt.width = 4)
+
+plot.ts(ts.af)
+mv_pelt <- cpt.meanvar(ts.af, penalty='Manual',pen.value=penalty.val, method = "PELT")
+plot(mv_pelt)
