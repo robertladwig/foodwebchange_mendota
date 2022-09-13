@@ -8,11 +8,45 @@ library(tidyverse)
 
 # Use these objects names, hardcoded at the moment
 LTERtemp = loadLTERtemp() # Download NTL LTER data from EDI
-LTERnutrients = loadLTERnutrients() # Download NTL LTER data from EDI
+LTERnutrients_old = loadLTERnutrients() # Download NTL LTER data from EDI
 LTERions = loadLTERions() # Download NTL LTER data from EDI
 
 availableVars()
 
+# Hilary will kill me when she sees how I butchered her awesome functions...
+addNutr <- read_csv('../data/SLOH_2019-21.csv')
+addNutr = addNutr %>%
+  dplyr::filter(lakeid == 'ME') %>%
+  mutate(sampledate = as.Date(sampledate))
+addPH <- read_csv('../data/Mendota_pH.csv')
+
+idxPH <- match(as.Date(addPH$sampledate), as.Date(addNutr$sampledate))
+addPH_df = data.frame('lakeid' = 'ME', 'sampledate' = addPH[na.omit(idxPH), 'sampledate'],
+                      'depth' = 0, 'flag' = addPH[na.omit(idxPH), 'flag_avg_ph'],
+                      'param' = 'ph', 'value' = addPH[na.omit(idxPH), 'avg_ph']) %>%
+  rename(flag = flag_avg_ph, value = avg_ph) %>%
+  mutate(sampledate = as.Date(sampledate))
+
+addNutr_all <- rbind(addNutr, addPH_df)
+
+addNutr_df <- addNutr_all %>%
+  mutate(lakeid = as.character(lakeid), sampledate = as.POSIXct(sampledate),
+         year4 = year(sampledate), daynum = yday(sampledate)) %>%
+  spread(param, value) %>%
+  rename(drp_sloh = DRP_SLOH, drsif_sloh = DRSIF_SLOH, no3no2_sloh = NO3NO2_SLOH) %>%
+  dplyr::select(-flag)
+
+idx_colnames = which(colnames(LTERnutrients_old) %in% colnames(addNutr_df))
+columnsToAdd <- colnames(LTERnutrients_old)[-idx_colnames] 
+addNutr_df[, columnsToAdd] <- NA
+
+LTERnutrients <- rbind(LTERnutrients_old, addNutr_df) %>%
+  group_by(lakeid) %>%
+  arrange(sampledate, depth)
+
+ggplot(subset(LTERnutrients, lakeid == "ME" & depth == 0), aes(sampledate, ph)) + geom_point()
+
+# Original stuff
 df.pH = weeklyInterpolate(lakeAbr = 'ME', var = 'ph', maxdepth = 24, 
                           constrainMethod = 'zero', setThreshold = 0.1, printFigs = F)
 
@@ -38,8 +72,8 @@ hypso <- read_csv('../data/LakeEnsemblR_bathymetry_standard.csv')
 H <- hypso$Depth_meter
 A <- hypso$Area_meterSquared
 
-areas <- approx(H, A, unique(df.ME$weeklyInterpolated$depth))$y
-depths = unique(df.ME$weeklyInterpolated$depth)
+areas <- approx(H, A, unique(df.tp$weeklyInterpolated$depth))$y
+depths = unique(df.tp$weeklyInterpolated$depth)
 bath = data.frame('depths' = depths, 'areas' = areas)
 
 df.ph = data.frame('datetime' = unique(df.pH$weeklyInterpolated$date), 'ph' = NA)
@@ -96,7 +130,7 @@ for (i in (df.silica$datetime)){
 start <- read_csv('../output/stratification_start.csv')
 end <- read_csv('../output/stratification_end.csv')
 
-df = data.frame('year' =strat$year, 'pH' = NA, 'PO4.P_surf' = NA, 'PO4.P_bot' = NA, 'NO3.NO2.N_surf' = NA, 'NO3.NO2.N_bot' = NA, 'RSi' = NA)
+df = data.frame('year' =start$year, 'pH' = NA, 'PO4.P_surf' = NA, 'PO4.P_bot' = NA, 'NO3.NO2.N_surf' = NA, 'NO3.NO2.N_bot' = NA, 'RSi' = NA)
 for (i in df$year){
   st = start %>%
     dplyr::filter(year == i) %>%
