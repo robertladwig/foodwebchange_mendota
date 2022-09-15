@@ -38,6 +38,8 @@ cw <- readRDS('../data/yearly_clearwater_stats.rds')
 
 nutrients <- read_csv('../output/nutrients.csv')
 
+spiny <- read_csv('../output/spiny.csv')
+
 
 col.pre <- "steelblue"
 col.post <- "orange3"
@@ -70,13 +72,20 @@ df.cw <- cw %>%
   dplyr::filter(Year > 1995) %>%
   rename(year = Year)
 
+df.spiny <- spiny %>%
+  dplyr::filter(year != 1995 & year != 2021) %>%
+  rename(year = year, Spiny = mean)
+
 df <- merge(df.strat, df.anoxic, by = 'year')
 df <- merge(df, df.flux, by = 'year')
 df <- merge(df, df.biomass, by = 'year')
 df <- merge(df, df.discharge, by = 'year')
 df <- merge(df, df.cw, by = 'year')
 df <- merge(df, df.nutrients, by = 'year')
+df <- merge(df, df.spiny, by = 'year')
 
+str(df)
+head(df)
 
 mod <- lm(AF ~ med + Days.0.5.mg.L + Jz, data = df)
 summary(mod)
@@ -85,9 +94,10 @@ boruta_output <- Boruta(AF ~ med + Jz + Jv + Ja +
                           Days.0.5.mg.L + Days.1.mg.L + Days.1.5.mg.L +
                           Days.2.mg.L + Days.3.mg.L +
                           discharge + max.discharge + min.discharge +
-                          Clearwater.Duration + Prev.Winter.Duration + Max.Clearwater.Depth.m, 
+                          Clearwater.Duration + Prev.Winter.Duration + Max.Clearwater.Depth.m + Spiny +
+                          pH + PO4.P_surf+ PO4.P_bot+ NO3.NO2.N_surf+ NO3.NO2.N_bot+ RSi, 
                         data = df, doTrace=2,
-                        maxRuns = 1e4)  # perform Boruta search
+                        maxRuns = 1e5)  # perform Boruta search
 boruta_signif <- names(boruta_output$finalDecision[boruta_output$finalDecision %in% c("Confirmed", "Tentative")])  # collect Confirmed and Tentative variables
 print(boruta_signif)  # significant variables
 plot(boruta_output, cex.axis=1.5, las=3, xlab="", main="")  # plot variable importance
@@ -112,7 +122,9 @@ summary(hypo1)
 sum.hypo1 <-summary(hypo1)
 step(hypo1)
 
-hypo1 <- lm(AF ~ med + Days.0.5.mg.L + Jz + Clearwater.Duration, data = hyp.data)
+hypo1 <- lm(AF ~ med + Days.0.5.mg.L  + Clearwater.Duration , data = hyp.data)
+hypo1 <- lm(AF ~ med + Days.0.5.mg.L + Jz + Clearwater.Duration + Spiny, data = hyp.data)
+hypo1 <- lm(AF ~ med + Days.0.5.mg.L + Clearwater.Duration + Spiny + PO4.P_surf  + PO4.P_bot , data = hyp.data)
 
 sum.hypo1 <-summary(hypo1)
 
@@ -132,16 +144,34 @@ varImp(hypo1, scale = TRUE)
 
 
 # 2. Regression line + confidence intervals
+# modeleq <- paste0('y = ', round(sum.hypo1$coefficients[1,1],2),
+#                   ' + ',round(sum.hypo1$coefficients[2,1],2),' Strat.dur',
+#                   ' + ',round(sum.hypo1$coefficients[3,1],2),' Days.0.5',
+#                   ' + ',round(sum.hypo1$coefficients[4,1],2),' Total.sink',
+#                   ' + ',round(sum.hypo1$coefficients[5,1],2),' ClearWat.dur',
+#                   ' + ',round(sum.hypo1$coefficients[6,1],2),' SWF',
+#                   ' + e, where e ~ N(0,',round(sum.hypo1$sigma,2),")")
 modeleq <- paste0('y = ', round(sum.hypo1$coefficients[1,1],2),
                   ' + ',round(sum.hypo1$coefficients[2,1],2),' Strat.dur',
                   ' + ',round(sum.hypo1$coefficients[3,1],2),' Days.0.5',
-                  ' + ',round(sum.hypo1$coefficients[4,1],2),' Total.sink',
-                  ' + ',round(sum.hypo1$coefficients[5,1],2),' ClearWat.dur',
+                  ' + ',round(sum.hypo1$coefficients[4,1],2),' ClearWat.dur',
+                  ' + ',round(sum.hypo1$coefficients[5,1],2),' SWF',
+                  ' + ',round(sum.hypo1$coefficients[6,1],2),' PO4.surf',
+                  ' + ',round(sum.hypo1$coefficients[7,1],2),' PO4.bot',
+                  ' + e, where e ~ N(0,',round(sum.hypo1$sigma,2),")")
+modeleq1 <- paste0('y = ', round(sum.hypo1$coefficients[1,1],2),
+                  ' + ',round(sum.hypo1$coefficients[2,1],2),' Strat.dur',
+                  ' + ',round(sum.hypo1$coefficients[3,1],2),' Days.0.5',
+                  ' + ',round(sum.hypo1$coefficients[4,1],2),' ClearWat.dur',
+                  ' + ')
+modeleq2 <- paste0(round(sum.hypo1$coefficients[5,1],2),' SWF',
+                  ' + ',round(sum.hypo1$coefficients[6,1],2),' PO4.surf',
+                  ' + ',round(sum.hypo1$coefficients[7,1],2),' PO4.bot',
                   ' + e, where e ~ N(0,',round(sum.hypo1$sigma,2),")")
 library(latex2exp)
 
 pred.int <- predict(hypo1, interval = "confidence")
-pred.int <- pred.int * attr(sc.info, 'scaled:scale')[7] + attr(sc.info, 'scaled:center')[7]
+pred.int <- pred.int * attr(sc.info, 'scaled:scale')[9] + attr(sc.info, 'scaled:center')[9]
 
 mydata <- cbind(data.frame('AF'  = df$AF), pred.int)
 
@@ -152,8 +182,9 @@ p <- ggplot(mydata, aes(fit, AF)) +
   xlab('Predicted Anoxic Factor [d per season]')+
   ylab('Anoxic Factor [d per season]')+
   theme_minimal()+
-  annotate("text", x = 61, y = 82.5, label = modeleq, size = 3)+
-  annotate("text", x = 50, y = 80, label = (paste0('R2 = ',round(sum.hypo1$r.squared,2))), size =3) +
+  annotate("text", x = 61, y = 82.5, label = modeleq1, size = 3)+
+  annotate("text", x = 61, y = 80, label = modeleq2, size = 3)+
+  annotate("text", x = 50, y = 77.5, label = (paste0('R^2 = ',round(sum.hypo1$r.squared,2))), size =3) +
   theme(text = element_text(size=10),
         axis.text.x = element_text(angle=0, hjust=1));p
 p.linear <- p + geom_line(aes(y = lwr), color = "grey", linetype = "dashed")+
@@ -166,7 +197,7 @@ ggsave(file=paste0('../figs/linearModel.png'), p.linear, dpi = 300,width = 216,h
 hyp.data2 <- hyp.data[, c(1,2,3,6,7)]
 
 
-colnames(hyp.data2) = c('Strat.dur', 'Total.sink', 'Days.0.5','ClearWat.dur', 'Anoxic.Factor')
+colnames(hyp.data2) = c('Strat.dur', 'Total.sink', 'Days.0.5','ClearWat.dur', 'Anoxic.Factor', "SWF")
 
 res=cor(hyp.data2, method = c("pearson"))
 
@@ -263,8 +294,42 @@ g8 <- ggplot(df,aes(Clearwater.Duration, AF)) +
                label.x = 0.1) +
   theme_bw()
 
+g9 <- ggplot(df,aes(Spiny, AF)) + 
+  geom_point() +
+  xlab('Spiny waterflea biomass (?)') + ylab('Anoxic factor (d)') +
+  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
+  stat_poly_eq(formula = my.formula,
+               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               parse = TRUE,size = rel(4.5),
+               label.y = 0.05,
+               label.x = 0.1) +
+  theme_bw()
+
+g10 <- ggplot(df,aes(PO4.P_surf, AF)) + 
+  geom_point() +
+  xlab('Epilimnetic phosphate (mg/L)') + ylab('Anoxic factor (d)') +
+  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
+  stat_poly_eq(formula = my.formula,
+               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               parse = TRUE,size = rel(4.5),
+               label.y = 0.05,
+               label.x = 0.1) +
+  theme_bw()
+
+g11 <- ggplot(df,aes(PO4.P_bot, AF)) + 
+  geom_point() +
+  xlab('Hypolimnetic phosphate (mg/L)') + ylab('Anoxic factor (d)') +
+  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
+  stat_poly_eq(formula = my.formula,
+               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               parse = TRUE,size = rel(4.5),
+               label.y = 0.05,
+               label.x = 0.1) +
+  theme_bw()
+
 g <- (g1 + g2) / (g3 + g4)  / (g5 + g6) / (g7 + g8); g
 g <- (g1 + g4) / (g5 + g8)  / (p.linear) + plot_annotation(tag_levels = 'A') + theme_bw(); g
+g <- (g1 + g5) / (g8 + g9)  / (g10 + g11) / (p.linear) + plot_annotation(tag_levels = 'A') + theme_bw(); g
 ggsave(plot = g, '../figs/Fig2_woCorr.png', dpi = 300, units = 'in', width = 7, height = 10)
 
 cool.col <- c("#00AFBB", "#E7B800", "#FC4E07")
@@ -378,6 +443,12 @@ g14 <- ggplot(df) +
   ylab('React. Silica (mg/L)') + xlab('') +
   geom_vline(xintercept=2010, linetype = 'dashed') +
   theme_bw(); 
+g15 <- ggplot(df) +
+  geom_line(aes(year, Spiny)) +
+  geom_point(aes(year, Spiny)) +
+  ylab('Spiny Waterflea (?)') + xlab('') +
+  geom_vline(xintercept=2010, linetype = 'dashed') +
+  theme_bw(); 
 
 
 g5 / g6 / g7 / g9 /g10 /g8 / g11 /g12 /g13/ g14
@@ -389,7 +460,7 @@ g5 / g6 / g7 / g9 /g10 /g8 / g11 /g12 /g13/ g14
 library(ggpubr)
 df.prior = df %>%
   mutate('class' = ifelse(year < 2010, 'prior 2010','post 2010')) %>%
-  dplyr::select(class, AF, med, Jz, Days.0.5.mg.L, discharge, Clearwater.Duration, pH, PO4.P_surf, NO3.NO2.N_surf, RSi)
+  dplyr::select(class, AF, med, Jz, Days.0.5.mg.L, discharge, Clearwater.Duration, pH, PO4.P_surf, NO3.NO2.N_surf, RSi, Spiny)
 m.df.prior <- reshape2::melt(df.prior, id = 'class')
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'AF'))
@@ -484,6 +555,16 @@ p10 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'RSi'), x = "class", 
 #  Add p-value
 p10 = p10 + stat_compare_means()
 
+
+compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'Spiny'))
+compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'Spiny'), method ="kruskal.test")
+
+p11 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'Spiny'), x = "class", y = "value",
+                  palette = "jco", xlab = '', ylab = 'Spiny', fill = c(col.pre, col.post),
+                  add = "jitter")
+#  Add p-value
+p11 = p11 + stat_compare_means()
+
 (g5 / g6 / g7 / g9 / g10 /g8 / g11 /g12 /g13/ g14 ) | (p1 / p2 /p3 /p5/p6 /p4 /p7 / p8  / p9 /p10)
 
 
@@ -570,8 +651,10 @@ plt5 <- (g8 + ggtitle("E")+ p4)  + plot_layout(guides = 'collect',widths = c(2, 
 plt6 <- (g12 + ggtitle("F")+ p8)  + plot_layout(guides = 'collect',widths = c(2, 1))
 plt7 <- (g13 + ggtitle("G")+ p9)  + plot_layout(guides = 'collect',widths = c(2, 1))
 plt8 <- (g14 + ggtitle("H")+ p10) + plot_layout(guides = 'collect',widths = c(2, 1))
+plt9 <- (g15 + ggtitle("I")+ p11) + plot_layout(guides = 'collect',widths = c(2, 1))
+plt10 <- (g11 + ggtitle("J")+ p7) + plot_layout(guides = 'collect',widths = c(2, 1))
 
 
-fig.plt <- (plt1 | plt2) / (plt3 | plt4) / (plt5 | plt6) / (plt7 | plt8); fig.plt
-ggsave(plot = fig.plt , '../figs/Fig1_wBreakpoint.png', dpi = 300, units = 'in', width = 17, height = 12)
+fig.plt <- (plt1 | plt2) / (plt3 | plt4) / (plt5 | plt6) / (plt7 | plt8) / (plt9 | plt10); fig.plt
+ggsave(plot = fig.plt , '../figs/Fig1_wBreakpoint.png', dpi = 300, units = 'in', width = 17, height = 16)
 
