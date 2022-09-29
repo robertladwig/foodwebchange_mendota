@@ -98,7 +98,7 @@ setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 source('stratification_functions.R')
 
 # Choose density criteria
-dens.difference = 0.05 # cutoff for stratification in g/kg
+dens.difference = 0.1 # cutoff for stratification in g/kg 0.05 #
 p.duration = list() # for figures 
 p.start = list() # for figures 
 p.end = list() # for figures 

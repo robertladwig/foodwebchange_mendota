@@ -163,7 +163,7 @@ A <- hypso$Area_meterSquared
 
 df <- dt1 %>%
   dplyr::filter(lakeid == 'ME') %>%
-  select(year4, sampledate, depth, wtemp, o2, flago2)
+  dplyr::select(year4, sampledate, depth, wtemp, o2, flago2)
 
 summary(as.factor(df$depth))
 
@@ -259,7 +259,7 @@ for (id.year in unique(df$year4)[-1]){
   if (max.date > max.date2){
     max.date <- max.date
   } else {
-    max.date <- max.date2
+    max.date <- max.date
   }
 
   
@@ -310,7 +310,7 @@ for (id.year in unique(df$year4)[-1]){
     
     if (j == nrow(dat2)){
       df.lag <- rbind(df.lag, data.frame('year' = id.year,
-                                         'timelag' = end.time - ssi.start.date,#strat.onset.date,
+                                         'timelag' = end.time - strat.onset.date,#strat.onset.date,ssi.start.date,
                                          'id' = 'ME'))
     }
 
@@ -350,7 +350,9 @@ for (l in unique(df.livingstone$year)){
 
   sum.mod <- lm(abs(jz) ~ log(alphaz), data = dit.l)
   p  <-summary(sum.mod)$coefficients[,"Pr(>|t|)"][2]
-
+  
+  
+  
   if (!is.na(p) && p <= 0.05){
     coeff = rbind(coeff, data.frame('year' = l,
                                     'Jz' = abs(median(dit.l$jz, na.rm = T)),
@@ -358,6 +360,7 @@ for (l in unique(df.livingstone$year)){
                                     'Ja' = sum.mod$coefficients[2],
                                     'id' = "ME"))
   } else {
+    print(paste0(l,' violates assumptions: p= ',as.numeric(p)))
     coeff = rbind(coeff, data.frame('year' = l,
                                     'Jz' = NA,
                                     'Jv' = NA,
