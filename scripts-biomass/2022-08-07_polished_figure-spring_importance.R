@@ -3,7 +3,8 @@
 # think we should use different lag definition- days since mean strat onset date
 
 
-save.to.folder <- "plots/2022-08-07_spring_importance_plot"
+# save.to.folder <- "plots/2022-08-07_spring_importance_plot"
+save.to.folder <- "plots/2022-09-30_spring_importance_plot"
 
 # ---- format biomass data ----
 
@@ -39,7 +40,8 @@ phyto.groups <- list("ice.pre" = phyto$ice[i.pre],
 
 # ---- format anoxia data ----
 
-anoxia <- read.csv(file = "robin-data/2022-08-03_time_lag_from_robert/timelag.csv")
+# anoxia <- read.csv(file = "robin-data/2022-08-03_time_lag_from_robert/timelag.csv")
+anoxia <- read.csv(file = "robin-data/2022-08-03_time_lag_from_robert/2022-09-29_timelag-start_of_season.csv")
 
 anoxia.groups <- list("pre" = anoxia$timelag[anoxia$year < 2010],
                       "post" = anoxia$timelag[anoxia$year >= 2010])
@@ -101,7 +103,6 @@ stripchart(x = anoxia.groups, at = c(1,2), vertical = T, add = T, pch = 19, meth
 # ---- save tables ----
 
 write.csv(x = phyto, file = file.path(save.to.folder,"mean_annual_biomass_by_season.csv"))
-
 write.csv(x = phyto.summary, file = file.path(save.to.folder, "mean_annual_biomass_by_season-stats.csv"))
 
 
@@ -128,8 +129,10 @@ boxplot(anoxia.groups, horizontal = F, col = c(col.pre, col.post), range = 1.5, 
 box()
 axis(side = 1, at = 1.5, labels = F, lwd = 0, lwd.ticks = 1)
 axis(side = 1, at = 1.5, lwd = 0, labels = "Anoxia lag", line = -.25)
-axis(side = 2, lwd = 0, lwd.ticks = 1, at = c(0,15,30,45), labels = F)
-axis(side = 2, lwd = 0, at = c(0,15,30,45), labels = T, las = 2, line = -.25)
+# axis(side = 2, lwd = 0, lwd.ticks = 1, at = c(0,15,30,45), labels = F)
+axis(side = 2, lwd = 0, lwd.ticks = 1, at = c(30,45,60,75), labels = F)
+# axis(side = 2, lwd = 0, at = c(0,15,30,45), labels = T, las = 2, line = -.25)
+axis(side = 2, lwd = 0, at = c(30,45,60,75), labels = T, las = 2, line = -.25)
 mtext(text = "Lag between stratification\nand anoxia (days)", side = 2, line = 2.25)
 
 
