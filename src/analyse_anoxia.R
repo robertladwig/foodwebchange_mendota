@@ -460,7 +460,7 @@ g5 / g6 / g7 / g9 /g10 /g8 / g11 /g12 /g13/ g14
 library(ggpubr)
 df.prior = df %>%
   mutate('class' = ifelse(year < 2010, 'prior 2010','post 2010')) %>%
-  dplyr::select(class, AF, med, Jz, Days.0.5.mg.L, discharge, Clearwater.Duration, pH, PO4.P_surf, NO3.NO2.N_surf, RSi, Spiny)
+  dplyr::select(class, AF, med, Jz, Jv, Days.0.5.mg.L, discharge, Clearwater.Duration, pH, PO4.P_surf, NO3.NO2.N_surf, RSi, Spiny)
 m.df.prior <- reshape2::melt(df.prior, id = 'class')
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'AF'))
@@ -492,6 +492,8 @@ p3 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'Jz'), x = "class", y 
 #  Add p-value
 p3 = p3 + stat_compare_means()
 
+m.df.prior %>% dplyr::filter(variable == 'Jz')%>% group_by(class) %>% summarise(mean = median(value))
+
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'Days.0.5.mg.L'))
 compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'Days.0.5.mg.L'), method ="kruskal.test")
 
@@ -500,6 +502,9 @@ p4 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'Days.0.5.mg.L'), x = 
                  add = "jitter")
 #  Add p-value
 p4 = p4 + stat_compare_means()
+
+
+m.df.prior %>% dplyr::filter(variable == 'Days.0.5.mg.L')%>% group_by(class) %>% summarise(mean = median(value))
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'discharge'))
 compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'discharge'), method ="kruskal.test")
@@ -518,6 +523,8 @@ p6 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'Clearwater.Duration')
                  add = "jitter")
 #  Add p-value
 p6 = p6 + stat_compare_means()
+
+m.df.prior %>% dplyr::filter(variable == 'Clearwater.Duration')%>% group_by(class) %>% summarise(mean = median(value))
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'pH'))
 compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'pH'), method ="kruskal.test")
@@ -643,18 +650,19 @@ plt2 <-  (p1 / p2 /p3 /p6 /p4  / p8  / p9 /p10)
 
 plt1 | plt2 +plot_layout(guides = 'collect',widths = c(500, 1))
 
-plt1 <- (g5 + ggtitle("A") +  p1)  + plot_layout(guides = 'collect',widths = c(2, 1))
-plt2 <- (g6 + ggtitle("B")+ p2)  + plot_layout(guides = 'collect',widths = c(2, 1))
-plt3 <- (g7 + ggtitle("C")+ p3)  + plot_layout(guides = 'collect',widths = c(2, 1))
-plt4 <- (g10 + ggtitle("D")+ p6)  + plot_layout(guides = 'collect',widths = c(2, 1))
-plt5 <- (g8 + ggtitle("E")+ p4)  + plot_layout(guides = 'collect',widths = c(2, 1))
-plt6 <- (g12 + ggtitle("F")+ p8)  + plot_layout(guides = 'collect',widths = c(2, 1))
-plt7 <- (g13 + ggtitle("G")+ p9)  + plot_layout(guides = 'collect',widths = c(2, 1))
-plt8 <- (g14 + ggtitle("H")+ p10) + plot_layout(guides = 'collect',widths = c(2, 1))
-plt9 <- (g15 + ggtitle("I")+ p11) + plot_layout(guides = 'collect',widths = c(2, 1))
-plt10 <- (g11 + ggtitle("J")+ p7) + plot_layout(guides = 'collect',widths = c(2, 1))
+plt1 <- (g5 + ggtitle("A") +  p1)  + plot_layout(guides = 'collect',widths = c(2, 1)) #anoxic
+plt2 <- (g6 + ggtitle("F")+ p2)  + plot_layout(guides = 'collect',widths = c(2, 1)) # strat
+plt3 <- (g7 + ggtitle("C")+ p3)  + plot_layout(guides = 'collect',widths = c(2, 1)) # do flux
+plt4 <- (g10 + ggtitle("E")+ p6)  + plot_layout(guides = 'collect',widths = c(2, 1)) # clear
+plt5 <- (g8 + ggtitle("D")+ p4)  + plot_layout(guides = 'collect',widths = c(2, 1)) # biomass
+plt6 <- (g12 + ggtitle("G")+ p8)  + plot_layout(guides = 'collect',widths = c(2, 1)) # P
+plt7 <- (g13 + ggtitle("H")+ p9)  + plot_layout(guides = 'collect',widths = c(2, 1)) # N
+plt8 <- (g14 + ggtitle("I")+ p10) + plot_layout(guides = 'collect',widths = c(2, 1)) # Si
+plt9 <- (g15 + ggtitle("B")+ p11) + plot_layout(guides = 'collect',widths = c(2, 1)) # spiny
+plt10 <- (g11 + ggtitle("J")+ p7) + plot_layout(guides = 'collect',widths = c(2, 1)) # pH
 
 
 fig.plt <- (plt1 | plt2) / (plt3 | plt4) / (plt5 | plt6) / (plt7 | plt8) / (plt9 | plt10); fig.plt
+fig.plt <- (plt1 | plt9) / (plt3 | plt5) / (plt4 | plt2) / (plt6 | plt7) / (plt8 | plt10); fig.plt
 ggsave(plot = fig.plt , '../figs/Fig1_wBreakpoint.png', dpi = 300, units = 'in', width = 17, height = 16)
 
