@@ -117,6 +117,8 @@ write.csv(x = spring.av, file = file.path(output.folder,"spring_yearly_av_taxa.c
 write.csv(x = stratified.av, file = file.path(output.folder,"stratified_yearly_av_taxa.csv"), quote = F, row.names = T)
 write.csv(x = fall.av, file = file.path(output.folder,"fall_yearly_av_taxa.csv"), quote = F, row.names = T)
 
+saveRDS(object = list("ice" = ice.av, "spring" = spring.av, "stratified" = stratified.av, "fall" = fall.av), file = "robin-data/2022-09-28_phyto_stats_by_taxon/taxon_year_averages_mg_L.rds")
+
 # ---- make a prettier plot ----
 
 pdf(file = file.path(output.folder,"season_barplot.pdf"), width = 6.5, height = 5)
