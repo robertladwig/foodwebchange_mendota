@@ -11,13 +11,21 @@ measured <- readRDS("robin-data/2022-06-09_annual_patterns/phyto_split_by_year.r
 strat <- read.csv(file = "output/stratification_start.csv")
 ice <- readRDS("data/2-ice_seasons_split_by_year.rds")
 
-save.formatted.strat.dates <- "robin-data/2022-06-23_stratification_dates.rds"
-save.season.assigned.interp.days <- "robin-data/2022-06-23_biomass_metrics/phyto_interp_split-by-year_with_seasons.rds"
-save.season.assigned.measured.days <- "robin-data/2022-06-23_biomass_metrics/phyto_measured_split-by-year_with_seasons.rds"
-save.season.biomass.metrics.interp <- "robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-interp_values.rds"
-save.season.biomass.metrics.measured <- "robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-measured_values.rds"
-save.season.biomass.individual.measurements <- "robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-individual_measurements"
-save.quick.plots.folder <- "plots/2022-06-23_biomass_metrics_by_season/"
+# save.formatted.strat.dates <- "robin-data/2022-06-23_stratification_dates.rds"
+# save.season.assigned.interp.days <- "robin-data/2022-06-23_biomass_metrics/phyto_interp_split-by-year_with_seasons.rds"
+# save.season.assigned.measured.days <- "robin-data/2022-06-23_biomass_metrics/phyto_measured_split-by-year_with_seasons.rds"
+# save.season.biomass.metrics.interp <- "robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-interp_values.rds"
+# save.season.biomass.metrics.measured <- "robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-measured_values.rds"
+# save.season.biomass.individual.measurements <- "robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-individual_measurements"
+# save.quick.plots.folder <- "plots/2022-06-23_biomass_metrics_by_season/"
+
+save.formatted.strat.dates <- "robin-data/2022-10-02_stratification_dates.rds"
+save.season.assigned.interp.days <- "robin-data/2022-10-02_biomass_metrics/phyto_interp_split-by-year_with_seasons.rds"
+save.season.assigned.measured.days <- "robin-data/2022-10-02_biomass_metrics/phyto_measured_split-by-year_with_seasons.rds"
+save.season.biomass.metrics.interp <- "robin-data/2022-10-02_biomass_metrics/biomass_metrics_by_season-interp_values.rds"
+save.season.biomass.metrics.measured <- "robin-data/2022-10-02_biomass_metrics/biomass_metrics_by_season-measured_values.rds"
+save.season.biomass.individual.measurements <- "robin-data/2022-10-02_biomass_metrics/biomass_metrics_by_season-individual_measurements"
+save.quick.plots.folder <- "plots/2022-10-02_biomass_metrics_by_season/"
 
 # ---- format strat dates ----
 make.empty.list.structure <- function(ListNames){
@@ -53,6 +61,7 @@ for (n in names(strat)){
 
 # ---- export strat ----
 
+cat(save.formatted.strat.dates)
 saveRDS(object = strat, file = save.formatted.strat.dates)
 rm(strat.end, strat.onset)
 
@@ -100,8 +109,10 @@ head(measured$`2020`)
 
 
 # ---- export seasons ----
-
+cat(save.season.assigned.interp.days)
 saveRDS(object = phyto, file = save.season.assigned.interp.days)
+
+cat(save.season.assigned.measured.days)
 saveRDS(object = measured, file = save.season.assigned.measured.days)
 
 # ----- get metrics ----
@@ -245,8 +256,13 @@ for (m in names(all.models)){
 
 # ---- export season biomass metrics ----
 
+cat(save.season.biomass.metrics.interp)
 saveRDS(object = all.models.interp, file = save.season.biomass.metrics.interp)
+
+cat(save.season.biomass.metrics.measured)
 saveRDS(object = all.models.measured, file = save.season.biomass.metrics.measured)
+
+cat(save.season.biomass.individual.measurements)
 saveRDS(object = all.models.individ.measurements, file = save.season.biomass.individual.measurements)
 
 # ---- quick looks ----
