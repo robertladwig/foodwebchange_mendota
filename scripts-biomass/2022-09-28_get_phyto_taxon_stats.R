@@ -1,6 +1,7 @@
 # RRR
 
-phyto <- readRDS("robin-data/2022-09-28_phyto_stats_by_taxon/taxon_year_averages_mg_L.rds")
+# phyto <- readRDS("robin-data/2022-09-28_phyto_stats_by_taxon/taxon_year_averages_mg_L.rds")
+phyto <- readRDS("robin-data/2022-10-02_phyto_stats_by_taxon/taxon_year_averages_mg_L.rds")
 
 # ---- make version of table as percent abundance ----
 phyto.perc <- phyto
@@ -11,7 +12,8 @@ for (s in 1:length(phyto.perc)){
   phyto.perc[[s]] <- as.perc
 }
 
-saveRDS(object = phyto.perc, file = "robin-data/2022-09-28_phyto_stats_by_taxon/taxon_year_averages_perc.rds")
+# saveRDS(object = phyto.perc, file = "robin-data/2022-09-28_phyto_stats_by_taxon/taxon_year_averages_perc.rds")
+saveRDS(object = phyto.perc, file = "robin-data/2022-10-02_phyto_stats_by_taxon/taxon_year_averages_perc.rds")
 
 # ---- get stats ----
 
@@ -51,5 +53,8 @@ for (s in names(phyto.perc)){
 phyto.perc
 
 
-saveRDS(object = phyto.abund, file = "robin-data/2022-09-28_phyto_stats_by_taxon/taxon_invasion_group_averages_mg_L.rds")
-saveRDS(object = phyto.perc, file = "robin-data/2022-09-28_phyto_stats_by_taxon/taxon_invasion_group_averages_perc.rds")
+# saveRDS(object = phyto.abund, file = "robin-data/2022-09-28_phyto_stats_by_taxon/taxon_invasion_group_averages_mg_L.rds")
+# saveRDS(object = phyto.perc, file = "robin-data/2022-09-28_phyto_stats_by_taxon/taxon_invasion_group_averages_perc.rds")
+
+saveRDS(object = phyto.abund, file = "robin-data/2022-10-02_phyto_stats_by_taxon/taxon_invasion_group_averages_mg_L.rds")
+saveRDS(object = phyto.perc, file = "robin-data/2022-10-02_phyto_stats_by_taxon/taxon_invasion_group_averages_perc.rds")

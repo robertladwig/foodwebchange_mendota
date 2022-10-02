@@ -6,7 +6,8 @@
 
 library(lubridate)
 
-strat.dates <- readRDS("robin-data/2022-06-23_stratification_dates.rds")
+# strat.dates <- readRDS("robin-data/2022-06-23_stratification_dates.rds")
+strat.dates <- readRDS("robin-data/2022-10-02_stratification_dates.rds")
 head(strat.dates$mean)
 strat.dates$mean$start # yday (and fractional)
 
@@ -75,5 +76,8 @@ sample.dates <- rbind(missing.dates, sample.dates)
 
 # ---- save data ----
 
-saveRDS(object = sample.dates, file = "robin-data/2022-07-25_season_dates/seasons_by_sample.rds")
-saveRDS(object = season.dates, file = "robin-data/2022-07-25_season_dates/seasons_by_year.rds")
+# saveRDS(object = sample.dates, file = "robin-data/2022-07-25_season_dates/seasons_by_sample.rds")
+# saveRDS(object = season.dates, file = "robin-data/2022-07-25_season_dates/seasons_by_year.rds")
+
+saveRDS(object = sample.dates, file = "robin-data/2022-10-02_season_dates/seasons_by_sample.rds")
+saveRDS(object = season.dates, file = "robin-data/2022-10-02_season_dates/seasons_by_year.rds")

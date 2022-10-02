@@ -3,12 +3,14 @@
 # think we should use different lag definition- days since mean strat onset date
 
 
-# save.to.folder <- "plots/2022-08-07_spring_importance_plot"
-save.to.folder <- "plots/2022-09-30_spring_importance_plot"
+# save.to.folder <- "plots/2022-08-07_spring_importance_plot" # stability metric of strat start
+# save.to.folder <- "plots/2022-09-30_spring_importance_plot" # season start == strat start, season start is 0.05 kg/m3
+save.to.folder <- "plots/2022-10-02_spring_importance_plot" # season start == strat start, season start is 0.1 kg/m3
 
 # ---- format biomass data ----
 
-phyto <- readRDS("robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-measured_values.rds")
+# phyto <- readRDS("robin-data/2022-06-23_biomass_metrics/biomass_metrics_by_season-measured_values.rds") # season start is 0.05
+phyto <- readRDS("robin-data/2022-10-02_biomass_metrics/biomass_metrics_by_season-measured_values.rds") # season start is 0.1
 
 phyto <- phyto$mean
 
@@ -40,8 +42,9 @@ phyto.groups <- list("ice.pre" = phyto$ice[i.pre],
 
 # ---- format anoxia data ----
 
-# anoxia <- read.csv(file = "robin-data/2022-08-03_time_lag_from_robert/timelag.csv")
-anoxia <- read.csv(file = "robin-data/2022-08-03_time_lag_from_robert/2022-09-29_timelag-start_of_season.csv")
+# anoxia <- read.csv(file = "robin-data/2022-08-03_time_lag_from_robert/timelag.csv") # start strat is stability thing
+# anoxia <- read.csv(file = "robin-data/2022-08-03_time_lag_from_robert/2022-09-29_timelag-start_of_season.csv") # start strat is start season, season start - 0.05
+anoxia <- read.csv(file = "robin-data/2022-08-03_time_lag_from_robert/2022-10-02_timelag.csv") # start strat is start season, season start - 0.1
 
 anoxia.groups <- list("pre" = anoxia$timelag[anoxia$year < 2010],
                       "post" = anoxia$timelag[anoxia$year >= 2010])
@@ -125,7 +128,7 @@ mtext(text = "Phytoplankton Biomass (mg/L)", side = 2, line = 1.75)
 # Must note in caption: 1 outlier point is outside the plot area (Fall 2011 = 14 mg/L)
 
 par(fig = c(.6,.9,0,1), new = T, mar = c(2,5,.5,1.5))
-boxplot(anoxia.groups, horizontal = F, col = c(col.pre, col.post), range = 1.5, axes = F, ann = F, lty = 1)
+boxplot(anoxia.groups, horizontal = F, col = c(col.pre, col.post), range = 1.5, axes = F, ann = F, lty = 1, outpch = 21, outbg = c(col.pre,col.post), outcex = .7)
 box()
 axis(side = 1, at = 1.5, labels = F, lwd = 0, lwd.ticks = 1)
 axis(side = 1, at = 1.5, lwd = 0, labels = "Anoxia lag", line = -.25)

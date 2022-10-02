@@ -1,10 +1,12 @@
 # RRR
 # Figure 5
 
-output.folder <- "plots/2022-08-11_taxa_composition_plot/"
+# output.folder <- "plots/2022-08-11_taxa_composition_plot/"
+output.folder <- "plots/2022-10-02_taxa_composition_plot/"
 
 phyto.list <- readRDS("robin-data/2022-06-08_phyto_list.rds")
-key <- readRDS("robin-data/2022-07-25_season_dates/seasons_by_sample.rds")
+# key <- readRDS("robin-data/2022-07-25_season_dates/seasons_by_sample.rds")
+key <- readRDS("robin-data/2022-10-02_season_dates/seasons_by_sample.rds")
 
 phyto <- phyto.list$div
 
@@ -80,15 +82,15 @@ get.yearly.av <- function(my.phy){
 
 spring.av <- get.yearly.av(my.phy = spring)
 all.equal(row.names(spring.av), col.key$taxa)
-setdiff(x = 1996:2020, y = colnames(spring.av)) # missing 2017
+setdiff(x = 1996:2020, y = colnames(spring.av)) # missing 2017 before, no years now
 
 stratified.av <- get.yearly.av(my.phy = stratified)
 all.equal(row.names(stratified.av), col.key$taxa)
-setdiff(x = 1996:2020, y = colnames(stratified.av))
+setdiff(x = 1996:2020, y = colnames(stratified.av)) # missing no years
 
 fall.av <- get.yearly.av(my.phy = fall)
 all.equal(row.names(fall.av), col.key$taxa)
-setdiff(x = 1996:2020, y = colnames(fall.av)) # missing 2000, 2001, 2014
+setdiff(x = 1996:2020, y = colnames(fall.av)) # before, missing 2000, 2001, 2014; now missing 2000 only
 
 ice.av <- get.yearly.av(my.phy = ice)
 all.equal(row.names(ice.av), col.key$taxa)
@@ -96,15 +98,26 @@ setdiff(x = 1996:2020, y = colnames(ice.av)) # missing 2002
 
 # ---- add missing year placeholders ----
 
-spring.av <- cbind(spring.av[ ,1:21], 
-                   "2017" = NA, 
-                   spring.av[ ,22:ncol(spring.av)])
+# strat start is 0.05
+# spring.av <- cbind(spring.av[ ,1:21], 
+#                    "2017" = NA, 
+#                    spring.av[ ,22:ncol(spring.av)])
+# 
+# fall.av <- cbind(fall.av[ ,1:4], 
+#                  "2000" = NA, "2001" = NA, 
+#                  fall.av[ ,5:16],
+#                  "2014" = NA,
+#                  fall.av[ ,17:ncol(fall.av)])
+# 
+# ice.av <- cbind(ice.av[ ,1:6],
+#                 "2002" = NA,
+#                 ice.av[ ,7:ncol(ice.av)])
 
-fall.av <- cbind(fall.av[ ,1:4], 
-                 "2000" = NA, "2001" = NA, 
-                 fall.av[ ,5:16],
-                 "2014" = NA,
-                 fall.av[ ,17:ncol(fall.av)])
+# strat start is 0.1
+
+fall.av <- cbind(fall.av[ ,1:4],
+                 "2000" = NA, 
+                 fall.av[ ,5:ncol(fall.av)])
 
 ice.av <- cbind(ice.av[ ,1:6],
                 "2002" = NA,
@@ -117,7 +130,9 @@ write.csv(x = spring.av, file = file.path(output.folder,"spring_yearly_av_taxa.c
 write.csv(x = stratified.av, file = file.path(output.folder,"stratified_yearly_av_taxa.csv"), quote = F, row.names = T)
 write.csv(x = fall.av, file = file.path(output.folder,"fall_yearly_av_taxa.csv"), quote = F, row.names = T)
 
-saveRDS(object = list("ice" = ice.av, "spring" = spring.av, "stratified" = stratified.av, "fall" = fall.av), file = "robin-data/2022-09-28_phyto_stats_by_taxon/taxon_year_averages_mg_L.rds")
+# saveRDS(object = list("ice" = ice.av, "spring" = spring.av, "stratified" = stratified.av, "fall" = fall.av), file = "robin-data/2022-09-28_phyto_stats_by_taxon/taxon_year_averages_mg_L.rds")
+saveRDS(object = list("ice" = ice.av, "spring" = spring.av, "stratified" = stratified.av, "fall" = fall.av), file = "robin-data/2022-10-02_phyto_stats_by_taxon/taxon_year_averages_mg_L.rds")
+
 
 # ---- make a prettier plot ----
 
@@ -145,7 +160,7 @@ bar.spots <- barplot(spring.av, col = col.key$color, border = NA, las = 2, names
 axis(side = 2, line = -.5, las = 2, cex.axis = .7,tck = -.05, labels = F, at = 0:6)
 axis(side = 2, lwd = 0, line = -1, las = 2, cex.axis = .7, at = 0:6)
 mtext(text = "Spring", side = 3, line = -1, at = 1, adj = 0)
-text(x = bar.spots[22], y = max(spring.av / 20, na.rm = T), labels = "X", xpd = NA, cex = .7, col = "grey3")
+# text(x = bar.spots[22], y = max(spring.av / 20, na.rm = T), labels = "X", xpd = NA, cex = .7, col = "grey3")
 
 par(fig = c(0,.84,0.2875,0.525), new = T)
 bar.spots <- barplot(stratified.av, col = col.key$color, border = NA, las = 2, names.arg = rep("",ncol(stratified.av)), axes = F)
@@ -159,7 +174,8 @@ bar.spots <- barplot(fall.av, col = col.key$color, border = NA, las = 2, names.a
 axis(side = 2, line = -.5, las = 2, cex.axis = .7,tck = -.05, labels = F, at = seq.int(0,14,2))
 axis(side = 2, lwd = 0, line = -1, las = 2, cex.axis = .7)
 mtext(text = "Fall", side = 3, line = -1, at = 1, adj = 0)
-text(x = bar.spots[c(5,6,19)], y = max(fall.av / 20, na.rm = T), labels = "X", xpd = NA, cex = .7, col = "grey3")
+# text(x = bar.spots[c(5,6,19)], y = max(fall.av / 20, na.rm = T), labels = "X", xpd = NA, cex = .7, col = "grey3")
+text(x = bar.spots[5], y = max(fall.av / 20, na.rm = T), labels = "X", xpd = NA, cex = .7, col = "grey3")
 
 text(x = bar.spots, y = -1.25, labels = colnames(fall.av), xpd = NA, srt = 90, adj = 1, cex = .7)
 
