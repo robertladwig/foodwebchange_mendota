@@ -9,7 +9,7 @@ library(lubridate)
 phyto <- readRDS("robin-data/2022-06-09_annual_patterns/phyto-interp_split_by_year.rds")
 measured <- readRDS("robin-data/2022-06-09_annual_patterns/phyto_split_by_year.rds")
 strat <- read.csv(file = "output/stratification_start.csv")
-ice <- readRDS("~/Desktop/pop/data/environmental_data/Robin-Refined/ice/2-ice_seasons_split_by_year.rds")
+ice <- readRDS("data/2-ice_seasons_split_by_year.rds")
 
 save.formatted.strat.dates <- "robin-data/2022-06-23_stratification_dates.rds"
 save.season.assigned.interp.days <- "robin-data/2022-06-23_biomass_metrics/phyto_interp_split-by-year_with_seasons.rds"
