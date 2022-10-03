@@ -2,9 +2,9 @@
 options(scipen = 999)
 
 
-# After the spiny water flea invasion, spring average biomass increased significantly from 1 ± 1 to 3 ± 2 (p = 0.03)
-# During ice-on, average biomass also increased significantly (p = 0.02), however the total biomass is much lower during this season.
-# We found that after the spiny water flea invasion, the lag between stratification onset and anoxia onset decreased by almost 2 weeks, from 51 ± 9 days to 39 ± 15 days (p = 0.02)
+# After the spiny water flea invasion, spring average phytoplankton biomass increased 2-fold to levels previously typical of stratification, from 1 ± 1 to 3 ± 2 mg/L (p = 0.005). 
+# Similarly, ice-on biomass increased to levels previously typical of spring, from 0.3 ± 0.3 to 2 ± 2 mg/L (p = 0.003) 
+# the lag between stratification onset and anoxia onset decreased by almost 2 weeks, from 51 ± 9 days to 39 ± 15 days (p = 0.02)
 x <- read.csv(file = "plots/2022-10-02_spring_importance_plot/mean_annual_biomass_by_season-stats.csv")
 x
 
