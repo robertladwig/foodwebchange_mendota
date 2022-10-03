@@ -1,5 +1,7 @@
 # RRR
 
+library(ggpubr)
+
 # phyto <- readRDS("robin-data/2022-09-28_phyto_stats_by_taxon/taxon_year_averages_mg_L.rds")
 phyto <- readRDS("robin-data/2022-10-02_phyto_stats_by_taxon/taxon_year_averages_mg_L.rds")
 
@@ -30,8 +32,10 @@ for (s in names(phyto)){
     my.stats$post[r] <- mean(phyto[[s]][r,i.post], na.rm = T)
     my.stats$sd.pre[r] <- sd(phyto[[s]][r,i.pre], na.rm = T)
     my.stats$sd.post[r] <- sd(phyto[[s]][r,i.post], na.rm = T)
-    my.t <- t.test(x = phyto[[s]][r,i.pre], y = phyto[[s]][r,i.post])
-    my.stats$p.value[r] <- my.t$p.value
+    # my.t <- t.test(x = phyto[[s]][r,i.pre], y = phyto[[s]][r,i.post])
+    # my.stats$p.value[r] <- my.t$p.value
+    my.k <- kruskal.test(x = list("pre" = phyto[[s]][r,i.pre], "post" = phyto[[s]][r,i.post]))
+    my.stats$p.value[r] <- my.k$p.value
   }
   phyto.abund[[s]] <- my.stats
 }
@@ -45,8 +49,10 @@ for (s in names(phyto.perc)){
     my.stats$post[r] <- mean(phyto.perc[[s]][r,i.post], na.rm = T)
     my.stats$sd.pre[r] <- sd(phyto.perc[[s]][r,i.pre], na.rm = T)
     my.stats$sd.post[r] <- sd(phyto.perc[[s]][r,i.post], na.rm = T)
-    my.t <- t.test(x = phyto.perc[[s]][r,i.pre], y = phyto.perc[[s]][r,i.post])
-    my.stats$p.value[r] <- my.t$p.value
+    # my.t <- t.test(x = phyto.perc[[s]][r,i.pre], y = phyto.perc[[s]][r,i.post])
+    # my.stats$p.value[r] <- my.t$p.value
+    my.k <- kruskal.test(x = list("pre" = phyto[[s]][r,i.pre], "post" = phyto[[s]][r,i.post]))
+    my.stats$p.value[r] <- my.k$p.value
   }
   phyto.perc[[s]] <- my.stats
 }

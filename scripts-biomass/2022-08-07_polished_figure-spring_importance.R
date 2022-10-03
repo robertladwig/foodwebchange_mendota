@@ -57,35 +57,40 @@ phyto.summary <- data.frame("Metric" = c("mean.pre","mean.post","sd.pre","sd.pos
                             "Fall" = NA,
                             "Days.till.anoxia" = NA)
 
-my.t <- t.test(x = phyto.groups$spring.pre, y = phyto.groups$spring.post)
+# my.t <- t.test(x = phyto.groups$spring.pre, y = phyto.groups$spring.post)
+my.t <- kruskal.test(x = list(x = phyto.groups$spring.pre, y = phyto.groups$spring.post))
 phyto.summary$Spring <- c(mean(phyto.groups$spring.pre, na.rm = T),
                           mean(phyto.groups$spring.post, na.rm = T),
                           sd(phyto.groups$spring.pre, na.rm = T),
                           sd(phyto.groups$spring.post, na.rm = T),
                           my.t$p.value)
 
-my.t <- t.test(x = phyto.groups$stratified.pre, y = phyto.groups$stratified.post)
+# my.t <- t.test(x = phyto.groups$stratified.pre, y = phyto.groups$stratified.post)
+my.t <- kruskal.test(x = list(x = phyto.groups$stratified.pre, y = phyto.groups$stratified.post))
 phyto.summary$Stratified <- c(mean(phyto.groups$stratified.pre, na.rm = T),
                               mean(phyto.groups$stratified.post, na.rm = T),
                               sd(phyto.groups$stratified.pre, na.rm = T),
                               sd(phyto.groups$stratified.post, na.rm = T),
                               my.t$p.value)
 
-my.t <- t.test(x = phyto.groups$fall.pre, y = phyto.groups$fall.post)
+# my.t <- t.test(x = phyto.groups$fall.pre, y = phyto.groups$fall.post)
+my.t <- kruskal.test(x = list(x = phyto.groups$fall.pre, y = phyto.groups$fall.post))
 phyto.summary$Fall <- c(mean(phyto.groups$fall.pre, na.rm = T),
                         mean(phyto.groups$fall.post, na.rm = T),
                         sd(phyto.groups$fall.pre, na.rm = T),
                         sd(phyto.groups$fall.post, na.rm = T),
                         my.t$p.value)
 
-my.t <- t.test(x = phyto.groups$ice.pre, y = phyto.groups$ice.post)
+# my.t <- t.test(x = phyto.groups$ice.pre, y = phyto.groups$ice.post)
+my.t <- kruskal.test(x = list(x = phyto.groups$ice.pre, y = phyto.groups$ice.post))
 phyto.summary$Ice <- c(mean(phyto.groups$ice.pre, na.rm = T),
                        mean(phyto.groups$ice.post, na.rm = T),
                        sd(phyto.groups$ice.pre, na.rm = T),
                        sd(phyto.groups$ice.post, na.rm = T),
                        my.t$p.value)
 
-my.t <- t.test(x = anoxia.groups$pre, y = anoxia.groups$post)
+# my.t <- t.test(x = anoxia.groups$pre, y = anoxia.groups$post)
+my.t <- kruskal.test(x = list(x = anoxia.groups$pre, y = anoxia.groups$post))
 phyto.summary$Days.till.anoxia <- c(mean(anoxia.groups$pre, na.rm = T),
                                     mean(anoxia.groups$post, na.rm = T),
                                     sd(anoxia.groups$pre, na.rm = T),

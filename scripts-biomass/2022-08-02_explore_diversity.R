@@ -92,7 +92,8 @@ for (s in names(diversity.pvals)){
     diversity.pvals[[s]][2,c] <- sd(diversity.by.year[pre,c], na.rm = T)
     diversity.pvals[[s]][3,c] <- mean(diversity.by.year[post,c], na.rm = T)
     diversity.pvals[[s]][4,c] <- sd(diversity.by.year[post,c], na.rm = T)
-    my.t <- t.test(x = diversity.by.year[pre,c], y = diversity.by.year[post,c])
+    # my.t <- t.test(x = diversity.by.year[pre,c], y = diversity.by.year[post,c])
+    my.t <- kruskal.test(x = list(x = diversity.by.year[pre,c], y = diversity.by.year[post,c]))
     diversity.pvals[[s]][5,c] <- my.t$p.value
   }
 }
