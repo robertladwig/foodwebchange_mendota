@@ -1,0 +1,36 @@
+polished figure spring importance
+
+2022-06-23_biomass_metrics/biomass_metrics_by_season-measured_values.rds
+
+
+6-23 #4 get metrics CHANGES
+
+2022-06-09_annual_patterns/phyto-interp_split_by_year.rds SAME
+
+2022-06-09_annual_patterns/phyto_split_by_year.rds SAME
+
+output/stratification_start.csv CHANGES
+
+pop/data/environmental_data/Robin-Refined/ice/2-ice_seasons_split_by_year.rds SAME
+
+
+6/9 biomass annual patterns SAME
+
+2022-06-08_phyto_list.rds
+
+
+
+polished figure taxa barplots
+
+robin-data/2022-06-08_phyto_list.rds SAME
+
+2022-07-25_season_dates/seasons_by_sample.rds CHANGE
+
+
+7/25 get season dates key
+
+2022-06-23_stratification_dates.rds CHANGED ALREADY
+
+data/2-ice_seasons_split_by_year.rds SAME
+
+2022-06-08_phyto_list.rds SAME
