@@ -50,7 +50,7 @@ anoxia.groups <- list("pre" = anoxia$timelag[anoxia$year < 2010],
                       "post" = anoxia$timelag[anoxia$year >= 2010])
 # ---- summary stats ----
 
-phyto.summary <- data.frame("Metric" = c("mean.pre","mean.post","sd.pre","sd.post","p.value"),
+phyto.summary <- data.frame("Metric" = c("mean.pre","mean.post","sd.pre","sd.post","fold.change","sd.fold.change","p.value"),
                             "Ice" = NA,
                             "Spring" = NA,
                             "Stratified" = NA,
@@ -63,6 +63,7 @@ phyto.summary$Spring <- c(mean(phyto.groups$spring.pre, na.rm = T),
                           mean(phyto.groups$spring.post, na.rm = T),
                           sd(phyto.groups$spring.pre, na.rm = T),
                           sd(phyto.groups$spring.post, na.rm = T),
+                          NA, NA,
                           my.t$p.value)
 
 # my.t <- t.test(x = phyto.groups$stratified.pre, y = phyto.groups$stratified.post)
@@ -71,6 +72,7 @@ phyto.summary$Stratified <- c(mean(phyto.groups$stratified.pre, na.rm = T),
                               mean(phyto.groups$stratified.post, na.rm = T),
                               sd(phyto.groups$stratified.pre, na.rm = T),
                               sd(phyto.groups$stratified.post, na.rm = T),
+                              NA, NA,
                               my.t$p.value)
 
 # my.t <- t.test(x = phyto.groups$fall.pre, y = phyto.groups$fall.post)
@@ -79,6 +81,7 @@ phyto.summary$Fall <- c(mean(phyto.groups$fall.pre, na.rm = T),
                         mean(phyto.groups$fall.post, na.rm = T),
                         sd(phyto.groups$fall.pre, na.rm = T),
                         sd(phyto.groups$fall.post, na.rm = T),
+                        NA, NA,
                         my.t$p.value)
 
 # my.t <- t.test(x = phyto.groups$ice.pre, y = phyto.groups$ice.post)
@@ -87,6 +90,7 @@ phyto.summary$Ice <- c(mean(phyto.groups$ice.pre, na.rm = T),
                        mean(phyto.groups$ice.post, na.rm = T),
                        sd(phyto.groups$ice.pre, na.rm = T),
                        sd(phyto.groups$ice.post, na.rm = T),
+                       NA, NA,
                        my.t$p.value)
 
 # my.t <- t.test(x = anoxia.groups$pre, y = anoxia.groups$post)
@@ -95,8 +99,11 @@ phyto.summary$Days.till.anoxia <- c(mean(anoxia.groups$pre, na.rm = T),
                                     mean(anoxia.groups$post, na.rm = T),
                                     sd(anoxia.groups$pre, na.rm = T),
                                     sd(anoxia.groups$post, na.rm = T),
+                                    NA, NA,
                                     my.t$p.value)
 
+phyto.summary[5,-1] <- phyto.summary[2,-1] / phyto.summary[1,-1]
+phyto.summary[6,-1] <- phyto.summary[5,-1] * sqrt((phyto.summary[3,-1]/phyto.summary[1,-1])^2 + (phyto.summary[4,-1]/phyto.summary[2,-1])) 
 
 # ---- quick look ----
 
