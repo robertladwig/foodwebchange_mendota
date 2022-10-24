@@ -182,9 +182,9 @@ p <- ggplot(mydata, aes(fit, AF)) +
   xlab('Predicted Anoxic Factor [d per season]')+
   ylab('Anoxic Factor [d per season]')+
   theme_minimal()+
-  annotate("text", x = 61, y = 82.5, label = modeleq1, size = 3)+
-  annotate("text", x = 61, y = 80, label = modeleq2, size = 3)+
-  annotate("text", x = 50, y = 77.5, label = (paste0('R^2 = ',round(sum.hypo1$r.squared,2))), size =3) +
+  # annotate("text", x = 61, y = 82.5, label = modeleq1, size = 3)+
+  # annotate("text", x = 61, y = 80, label = modeleq2, size = 3)+
+  annotate("text", x = 50, y = 77.5, label = (paste0('R2 = ',round(sum.hypo1$r.squared,2))), size =5) +
   theme(text = element_text(size=10),
         axis.text.x = element_text(angle=0, hjust=1));p
 p.linear <- p + geom_line(aes(y = lwr), color = "grey", linetype = "dashed")+
@@ -218,7 +218,7 @@ g1 <- ggplot(df,aes(med, AF)) +
   xlab('Mean stratification duration (d)') + ylab('Anoxic factor (d)') +
   geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
-               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               aes(label = paste(..rr.label.., sep = "~~~")), # ..eq.label.., ..rr.label..
                parse = TRUE,size = rel(4.5),
                label.y = 0.05,
                label.x = 0.1) +
@@ -228,7 +228,7 @@ g2 <- ggplot(df,aes(Jv, AF)) +
   xlab('Volumetric sink (g/m3/d))') + ylab('Anoxic factor (d)') +
   geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
-               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               aes(label = paste(..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
                label.y = 0.05,
                label.x = 0.1) +
@@ -238,7 +238,7 @@ g3 <- ggplot(df,aes(Ja, AF)) +
   xlab('Areal sink (g/m2/d)') + ylab('Anoxic factor (d)') +
   geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
-               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               aes(label = paste( ..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
                label.y = 0.05,
                label.x = 0.1) +
@@ -248,7 +248,7 @@ g4 <- ggplot(df,aes(Jz, AF)) +
   xlab('Total sink (g/m3/d)') + ylab('Anoxic factor (d)') +
   geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
-               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               aes(label = paste( ..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
                label.y = 0.05,
                label.x = 0.1) +
@@ -258,7 +258,7 @@ g5 <- ggplot(df,aes(Days.0.5.mg.L, AF)) +
   xlab('Biomass over 0.5 mg/L (d)') + ylab('Anoxic factor (d)') +
   geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
-               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               aes(label = paste( ..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
                label.y = 0.05,
                label.x = 0.1) +
@@ -268,7 +268,7 @@ g6 <- ggplot(df,aes(Days.1.5.mg.L, AF)) +
   xlab('Biomass over 1 mg/L (d)') + ylab('Anoxic factor (d)') +
   geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
-               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               aes(label = paste( ..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
                label.y = 0.05,
                label.x = 0.1) +
@@ -278,7 +278,7 @@ g7 <- ggplot(df,aes(discharge, AF)) +
   xlab('Yahara Q (cfs)') + ylab('Anoxic factor (d)') +
   geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
-               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               aes(label = paste(..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
                label.y = 0.05,
                label.x = 0.1) +
@@ -288,7 +288,7 @@ g8 <- ggplot(df,aes(Clearwater.Duration, AF)) +
   xlab('Clearwater duration') + ylab('Anoxic factor (d)') +
   geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
-               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               aes(label = paste( ..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
                label.y = 0.05,
                label.x = 0.1) +
@@ -299,7 +299,7 @@ g9 <- ggplot(df,aes(Spiny, AF)) +
   xlab('Spiny waterflea biomass (?)') + ylab('Anoxic factor (d)') +
   geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
-               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               aes(label = paste( ..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
                label.y = 0.05,
                label.x = 0.1) +
@@ -310,7 +310,7 @@ g10 <- ggplot(df,aes(PO4.P_surf, AF)) +
   xlab('Epilimnetic phosphate (mg/L)') + ylab('Anoxic factor (d)') +
   geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
-               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               aes(label = paste( ..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
                label.y = 0.05,
                label.x = 0.1) +
@@ -321,7 +321,7 @@ g11 <- ggplot(df,aes(PO4.P_bot, AF)) +
   xlab('Hypolimnetic phosphate (mg/L)') + ylab('Anoxic factor (d)') +
   geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ (x)) +
   stat_poly_eq(formula = my.formula,
-               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+               aes(label = paste( ..rr.label.., sep = "~~~")),
                parse = TRUE,size = rel(4.5),
                label.y = 0.05,
                label.x = 0.1) +
@@ -375,33 +375,13 @@ g7 <- ggplot(df, aes(year, Jz, col = 'Volumetric'), col = cool.col[1]) +
 g8 <- ggplot(df) +
   geom_line(aes(year, Days.0.5.mg.L)) +
   geom_point(aes(year, Days.0.5.mg.L)) +
-  # geom_line(aes(year, Days.0.5.mg.L, col = '0.5 mg/L')) +
-  # geom_point(aes(year, Days.0.5.mg.L, col = '0.5 mg/L')) +
-  # geom_line(aes(year, Days.1.mg.L, col = '1 mg/L')) +
-  # geom_point(aes(year, Days.1.mg.L, col = '1 mg/L')) +
-  # geom_line(aes(year, Days.1.5.mg.L, col = '1.5 mg/L')) +
-  # geom_point(aes(year, Days.1.5.mg.L, col = '1.5 mg/L')) +
-  # geom_line(aes(year, Days.2.mg.L, col = '2 mg/L')) +
-  # geom_point(aes(year, Days.2.mg.L, col = '2 mg/L')) +
-  # geom_line(aes(year, Days.3.mg.L, col = '3 mg/L')) +
-  # geom_point(aes(year, Days.3.mg.L, col = '3 mg/L')) +
-  # ylab('Biomass over threshold (days per year)') + xlab('') +
+
   ylab('Biomass over 0.5 mg/L (days per year)') + xlab('') +
   theme_bw()+
   theme(legend.position="bottom") +
   geom_vline(xintercept=2010, linetype = 'dashed') +
   theme(legend.title=element_blank())
-# ggplot(coeff, aes(year, Ja, col = 'Volume')) +
-#   # geom_line(aes(year, Jv, col = 'Volume')) +
-#   geom_line(aes(year, Ja , col = 'Sediment')) +
-#   # geom_line(aes(year, Jz, col = 'Median Sink')) +
-#   # geom_point(aes(year, Jv, col = 'Volume')) +
-#   geom_point(aes(year, Ja , col = 'Sediment')) +
-#   # geom_point(aes(year, Jz, col = 'Median Sink')) +
-#   # geom_smooth(method = "loess", size = 1.5) +
-#   geom_smooth(aes(year, Ja , col = 'Sediment'), method = "loess", size = 1.5) +
-#   ylab("Oxygen flux in g/m2/d") + xlab('') +
-#   theme_bw()
+
 g9 <- ggplot(df) +
   geom_ribbon(aes(x = year, ymin = min.discharge, ymax = discharge), fill = 'grey80') +
   geom_line(aes(year, discharge)) +
@@ -470,7 +450,7 @@ p1 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'AF'), x = "class", y 
                 palette = "jco", xlab = '', ylab = 'Anoxic Factor',fill = c(col.pre, col.post),
                 add = "jitter")
 #  Add p-value
-p1 = p1 + stat_compare_means()
+p1 = p1 + stat_compare_means(label = 'p.format')
 # Change method
 # p1 + stat_compare_means(method = "t.test")
 
@@ -481,7 +461,7 @@ p2 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'med'), x = "class", y
                  palette = "jco", xlab = '', ylab = 'Stratification duration',fill = c(col.pre, col.post),
                  add = "jitter")
 #  Add p-value
-p2 = p2 + stat_compare_means()
+p2 = p2 + stat_compare_means(label = 'p.format');p2
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'Jz'))
 compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'Jz'), method ="kruskal.test")
@@ -490,9 +470,12 @@ p3 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'Jz'), x = "class", y 
                  palette = "jco", xlab = '', ylab = 'Total oxygen sink',fill = c(col.pre, col.post),
                  add = "jitter")
 #  Add p-value
-p3 = p3 + stat_compare_means()
+p3 = p3 + stat_compare_means(label = 'p.format')
 
-m.df.prior %>% dplyr::filter(variable == 'Jz')%>% group_by(class) %>% summarise(mean = median(value))
+sddef = m.df.prior %>% dplyr::filter(variable == 'Jz')%>% group_by(class) %>% summarise(mean = mean(value),
+                                                                                sdv= sd(value))
+sddef$mean[1] - sddef$mean[2]
+sqrt(sddef$sdv[1]**2 - sddef$sdv[2]**2)
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'Days.0.5.mg.L'))
 compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'Days.0.5.mg.L'), method ="kruskal.test")
@@ -501,10 +484,13 @@ p4 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'Days.0.5.mg.L'), x = 
                  palette = "jco", xlab = '', ylab = 'Biomass over 0.5 mg/L',fill = c(col.pre, col.post),
                  add = "jitter")
 #  Add p-value
-p4 = p4 + stat_compare_means()
+p4 = p4 + stat_compare_means(label = 'p.format')
 
 
-m.df.prior %>% dplyr::filter(variable == 'Days.0.5.mg.L')%>% group_by(class) %>% summarise(mean = median(value))
+sddef = m.df.prior %>% dplyr::filter(variable == 'Days.0.5.mg.L')%>% group_by(class)%>% summarise(mean = mean(value),
+                                                                                          sdv= sd(value))
+sddef$mean[1] - sddef$mean[2]
+sqrt(abs(sddef$sdv[1]**2 - sddef$sdv[2]**2))
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'discharge'))
 compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'discharge'), method ="kruskal.test")
@@ -513,7 +499,7 @@ p5 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'discharge'), x = "cla
                  palette = "jco", xlab = '', ylab = 'Discharge',fill = c(col.pre, col.post),
                  add = "jitter")
 #  Add p-value
-p5 = p5 + stat_compare_means()
+p5 = p5 + stat_compare_means(label = 'p.format')
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'Clearwater.Duration'))
 compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'Clearwater.Duration'), method ="kruskal.test")
@@ -522,9 +508,12 @@ p6 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'Clearwater.Duration')
                  palette = "jco", xlab = '', ylab = 'Clearwater duration',fill = c(col.pre, col.post),
                  add = "jitter")
 #  Add p-value
-p6 = p6 + stat_compare_means()
+p6 = p6 + stat_compare_means(label = 'p.format')
 
-m.df.prior %>% dplyr::filter(variable == 'Clearwater.Duration')%>% group_by(class) %>% summarise(mean = median(value))
+sddef = m.df.prior %>% dplyr::filter(variable == 'Clearwater.Duration')%>% group_by(class) %>% summarise(mean = mean(value),
+                                                                                                 sdv= sd(value))
+sddef$mean[1] - sddef$mean[2]
+sqrt(abs(sddef$sdv[1]**2 - sddef$sdv[2]**2))
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'pH'))
 compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'pH'), method ="kruskal.test")
@@ -533,16 +522,16 @@ p7 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'pH'), x = "class", y 
                  palette = "jco", xlab = '', ylab = 'pH',fill = c(col.pre, col.post),
                  add = "jitter")
 #  Add p-value
-p7 = p7 + stat_compare_means()
+p7 = p7 + stat_compare_means(label = 'p.format')
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'PO4.P_surf'))
 compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'PO4.P_surf'), method ="kruskal.test")
 
 p8 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'PO4.P_surf'), x = "class", y = "value",
-                 palette = "jco", xlab = '', ylab = 'PO4-P surf',fill = c(col.pre, col.post),
+                 palette = "jco", xlab = '', ylab = 'SRP surf',fill = c(col.pre, col.post),
                  add = "jitter")
 #  Add p-value
-p8 = p8 + stat_compare_means()
+p8 = p8 + stat_compare_means(label = 'p.format')
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'NO3.NO2.N_surf'))
 compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'NO3.NO2.N_surf'), method ="kruskal.test")
@@ -551,7 +540,7 @@ p9 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'NO3.NO2.N_surf'), x =
                  palette = "jco", xlab = '', ylab = 'NO3-NO2-N surf',fill = c(col.pre, col.post),
                  add = "jitter")
 #  Add p-value
-p9 = p9 + stat_compare_means()
+p9 = p9 + stat_compare_means(label = 'p.format')
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'RSi'))
 compare_means(value ~ class, data =  m.df.prior %>% dplyr::filter(variable == 'RSi'), method ="kruskal.test")
@@ -560,7 +549,7 @@ p10 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'RSi'), x = "class", 
                  palette = "jco", xlab = '', ylab = 'RSi', fill = c(col.pre, col.post),
                  add = "jitter")
 #  Add p-value
-p10 = p10 + stat_compare_means()
+p10 = p10 + stat_compare_means(label = 'p.format')
 
 
 compare_means(value ~ class, data = m.df.prior %>% dplyr::filter(variable == 'Spiny'))
@@ -570,7 +559,7 @@ p11 <- ggboxplot( m.df.prior %>% dplyr::filter(variable == 'Spiny'), x = "class"
                   palette = "jco", xlab = '', ylab = 'Spiny', fill = c(col.pre, col.post),
                   add = "jitter")
 #  Add p-value
-p11 = p11 + stat_compare_means()
+p11 = p11 + stat_compare_means(label = 'p.format')
 
 (g5 / g6 / g7 / g9 / g10 /g8 / g11 /g12 /g13/ g14 ) | (p1 / p2 /p3 /p5/p6 /p4 /p7 / p8  / p9 /p10)
 
@@ -664,5 +653,7 @@ plt10 <- (g11 + ggtitle("J")+ p7) + plot_layout(guides = 'collect',widths = c(2,
 
 fig.plt <- (plt1 | plt2) / (plt3 | plt4) / (plt5 | plt6) / (plt7 | plt8) / (plt9 | plt10); fig.plt
 fig.plt <- (plt1 | plt9) / (plt3 | plt5) / (plt4 | plt2) / (plt6 | plt7) / (plt8 | plt10); fig.plt
+fig.plt <- (plt1 | plt9) / (plt3 | plt5) / (plt4 | plt2) / (plt6 | plt7) ; fig.plt
 ggsave(plot = fig.plt , '../figs/Fig1_wBreakpoint.png', dpi = 300, units = 'in', width = 17, height = 16)
+ggsave(plot = fig.plt , '../figs/Fig1_wBreakpoint.png', dpi = 300, units = 'in', width = 17, height = 13)
 
