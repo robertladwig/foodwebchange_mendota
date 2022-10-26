@@ -8,7 +8,9 @@
 
 # save.to.folder <- "plots/2022-08-07_spring_importance_plot" # stability metric of strat start
 # save.to.folder <- "plots/2022-09-30_spring_importance_plot" # season start == strat start, season start is 0.05 kg/m3
-save.to.folder <- "plots/2022-10-02_spring_importance_plot" # season start == strat start, season start is 0.1 kg/m3
+# save.to.folder <- "plots/2022-10-02_spring_importance_plot" # season start == strat start, season start is 0.1 kg/m3
+save.to.folder <- "plots/2022-10-25_spring_importance_plot" # season start == strat start, season start is 0.1 kg/m3, add p-values and panel labels
+
 
 # ---- format biomass data ----
 
@@ -136,26 +138,31 @@ col.post <- "orange3"
 
 pdf(file = file.path(save.to.folder,"spring_is_important.pdf"), width = 6.5, height = 3)
 
-par(fig = c(0,.6,0,1), mar = c(2,2.75,.5,.5))
+# par(fig = c(0,.6,0,1), mar = c(2,2.75,.5,.5))
+par(fig = c(0,.6,0,1), mar = c(2.75,2.75,.5,.5)) # accommodate new season names
 boxplot(x = phyto.groups, at = c(1,2,4,5,7,8,10,11), range = 1.5, ylim = c(0,8),
         lty = 1, axes = F, ann = F, col = c(col.pre,col.post), outpch = 21, outbg = c(col.pre,col.post), outcex = .7)
 box()
 axis(side = 1, at = c(1.5,4.5,7.5,10.5), lwd = 0, lwd.ticks = 1, labels = F)
-axis(side = 1, at = c(1.5,4.5,7.5,10.5), lwd = 0, labels = c("Ice-on","Spring","Stratified","Fall"), line = -.25)
+# axis(side = 1, at = c(1.5,4.5,7.5,10.5), lwd = 0, labels = c("Ice-on","Spring","Stratified","Fall"), line = -.25)
+mtext(text = c("Ice","Spring\nmixed","Stratified","Fall\nmixed"), side = 1, at = c(1.5,4.5,7.5,10.5), line = c(.75, 1.6))
 axis(side = 2, at = c(0,2,4,6,8), lwd = 0, lwd.ticks = 1, labels = F)
 axis(side = 2, at = c(0,2,4,6,8), lwd = 0, labels = T, las = 2, line = -.25)
-mtext(text = "Phytoplankton Biomass (mg/L)", side = 2, line = 1.75)
+# mtext(text = "Phytoplankton Biomass (mg/L)", side = 2, line = 1.75)
+mtext(text = "Phytoplankton Biomass (mg/L)", side = 2, line = 1.75, at = 3.5) # move out of way of "A" label
 # Must note in caption: 1 outlier point is outside the plot area (Fall 2011 = 14 mg/L)
 
-par(fig = c(.6,.9,0,1), new = T, mar = c(2,5,.5,1.5))
+# par(fig = c(.6,.9,0,1), new = T, mar = c(2,5,.5,1.5))
+par(fig = c(.6,.9,0,1), new = T,  mar = c(2.75,5,.5,1.5)) # accommodate new season names
 boxplot(anoxia.groups, horizontal = F, col = c(col.pre, col.post), range = 1.5, axes = F, ann = F, lty = 1, outpch = 21, outbg = c(col.pre,col.post), outcex = .7)
 box()
 axis(side = 1, at = 1.5, labels = F, lwd = 0, lwd.ticks = 1)
-axis(side = 1, at = 1.5, lwd = 0, labels = "Anoxia lag", line = -.25)
+# axis(side = 1, at = 1.5, lwd = 0, labels = "Anoxia lag", line = -.25)
+mtext(text = c("Anoxia lag"), side = 1, at = c(1.5), line = c(.75))
 # axis(side = 2, lwd = 0, lwd.ticks = 1, at = c(0,15,30,45), labels = F)
-axis(side = 2, lwd = 0, lwd.ticks = 1, at = c(30,45,60,75), labels = F)
+axis(side = 2, lwd = 0, lwd.ticks = 1, at = c(15,30,45,60), labels = F)
 # axis(side = 2, lwd = 0, at = c(0,15,30,45), labels = T, las = 2, line = -.25)
-axis(side = 2, lwd = 0, at = c(30,45,60,75), labels = T, las = 2, line = -.25)
+axis(side = 2, lwd = 0, at = c(15,30,45,60), labels = T, las = 2, line = -.25)
 mtext(text = "Lag between stratification\nand anoxia (days)", side = 2, line = 2.25)
 
 
@@ -169,5 +176,8 @@ rect(xleft = 0, xright = 3, ybottom = lab.1.ht - rect.size, ytop = lab.1.ht + re
 rect(xleft = 0, xright = 3, ybottom = lab.2.ht - rect.size, ytop = lab.2.ht + rect.size, col = col.post, xpd = NA)
 text(x = 4, y = lab.1.ht, label = "Pre", adj = 0)
 text(x = 4, y = lab.2.ht, label = "Post", adj = 0)
+
+mtext(text = "A", side = 3, outer = T, line = -1.25, at = .015, cex = 1.5)
+mtext(text = "B", side = 3, outer = T, line = -1.25, at = .64, cex = 1.5)
 
 dev.off()
